@@ -1,0 +1,4 @@
+Device 18F46K80
+Hwtool PICkit3 -p
+Program "./tmp/pic18f46k80_test.hex.elf"
+Quit

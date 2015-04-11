@@ -12,7 +12,7 @@
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
 
-#include "ds1820.h"
+//#include "ds1820.h"
 
 /******************************************************************************/
 /* User Global Variable Declaration                                           */
@@ -42,9 +42,9 @@ void main(void)
   Delay10KTCYx(128);
   Delay10KTCYx(128);
   Delay10KTCYx(128);
-  printf("\n");
-  printf("\n");
-  printf("Oscillator and Peripherals initialized!\n");
+  printf("\r\n");
+  printf("\r\n");
+  printf("Oscillator and Peripherals initialized!\r\n");
 
 
   
@@ -64,33 +64,33 @@ void main(void)
         for(i=0; i<6; i++) {
           index = i*2;
           sensorValue = ((uint8_t)temperature[index] * 256) + (uint8_t)temperature[index+1];
-          printf("ADC %d is: %u\n", i, sensorValue);
+          printf("ADC %d is: %u\r\n", i, sensorValue);
         }
       }
 
-        sensor_count = 0;
-        if ( DS1820_FindFirstDevice() ) {
-            do {
-                /* get temperature raw value (resolution 1/256?C) */
-                temperature_raw = DS1820_GetTempRaw();
-                /* convert raw temperature to string for output */
-                DS1820_GetTempString(temperature_raw, temperature);
-                /* get temperature value as float */
-                temperature_float = DS1820_GetTempFloat();
-                /* print result to RS232 interface */
-                printf("Sensor %d: %s?C (temperature_float = %f), temperature_raw = %ld)\n\r",
-                sensor_count,
-                temperature,
-                temperature_float,
-                temperature_raw);
-                sensor_count ++;
-                if(sensor_count == 3)
-                  break;
-            } while ( DS1820_FindNextDevice() );
-
-        sensor_count = 0;
-      } else {
-        printf("Could not find first device\n");
-      }
+//        sensor_count = 0;
+//        if ( DS1820_FindFirstDevice() ) {
+//            do {
+//                /* get temperature raw value (resolution 1/256?C) */
+//                temperature_raw = DS1820_GetTempRaw();
+//                /* convert raw temperature to string for output */
+//                DS1820_GetTempString(temperature_raw, temperature);
+//                /* get temperature value as float */
+//                temperature_float = DS1820_GetTempFloat();
+//                /* print result to RS232 interface */
+//                printf("Sensor %d: %s?C (temperature_float = %f), temperature_raw = %ld)\n\r",
+//                sensor_count,
+//                temperature,
+//                temperature_float,
+//                temperature_raw);
+//                sensor_count ++;
+//                if(sensor_count == 3)
+//                  break;
+//            } while ( DS1820_FindNextDevice() );
+//
+//        sensor_count = 0;
+//      } else {
+//        printf("Could not find first device\n");
+//      }
     }
  }
