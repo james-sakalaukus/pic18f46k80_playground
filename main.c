@@ -12,6 +12,8 @@
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
 
+#include "ds1820.h"
+
 /******************************************************************************/
 /* User Global Variable Declaration                                           */
 /******************************************************************************/
@@ -46,6 +48,10 @@ void main(void)
 
 
   
+  int16_t temperature_raw;     /* temperature raw value (resolution 1/256?C) */
+  float temperature_float;
+  char temperature[8];        /* temperature as string */
+  uint8_t sensor_count;         /* sensor counter */
 
     // start a conversion
     GODONE = 1;
@@ -61,40 +67,30 @@ void main(void)
           printf("ADC %d is: %u\n", i, sensorValue);
         }
       }
+
+        sensor_count = 0;
+        if ( DS1820_FindFirstDevice() ) {
+            do {
+                /* get temperature raw value (resolution 1/256?C) */
+                temperature_raw = DS1820_GetTempRaw();
+                /* convert raw temperature to string for output */
+                DS1820_GetTempString(temperature_raw, temperature);
+                /* get temperature value as float */
+                temperature_float = DS1820_GetTempFloat();
+                /* print result to RS232 interface */
+                printf("Sensor %d: %s?C (temperature_float = %f), temperature_raw = %ld)\n\r",
+                sensor_count,
+                temperature,
+                temperature_float,
+                temperature_raw);
+                sensor_count ++;
+                if(sensor_count == 3)
+                  break;
+            } while ( DS1820_FindNextDevice() );
+
+        sensor_count = 0;
+      } else {
+        printf("Could not find first device\n");
+      }
     }
-}
-
-/*
- * Begin Copied data from: http://www.picprojects.net/ds1820/
- */
-
-//int16_t temperature_raw;     /* temperature raw value (resolution 1/256?C) */
-//float temperature_float;
-//char temperature[8];        /* temperature as string */
-//uint8_t sensor_count;         /* sensor counter */
-//
-///* main loop */
-//while (1)
-//{
-///* set LED on measurement start */
-//LED1_On();
-//sensor_count = 0;
-//if ( DS1820_FindFirstDevice() ) {
-//    do {
-//        /* get temperature raw value (resolution 1/256?C) */
-//        temperature_raw = DS1820_GetTempRaw();
-//        /* convert raw temperature to string for output */
-//        DS1820_GetTempString(temperature_raw, temperature);
-//        /* get temperature value as float */
-//        temperature_float = DS1820_GetTempFloat();
-//        /* print result to RS232 interface */
-//        printf("Sensor %d: %s?C (temperature_float = %f), temperature_raw = %ld)\n\r",
-//        sensor_count,
-//        temperature,
-//        temperature_float,
-//        temperature_raw);
-//        sensor_count ++;
-//    } while ( DS1820_FindNextDevice() );
-//
-//sensor_count = 0;
-//}
+ }
