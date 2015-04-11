@@ -9,7 +9,6 @@
 #include "user.h"
 #include "system.h"
 
-//#include <delays.h>
  #include <plib.h>
 
 //#include "ds1820.h"
@@ -22,6 +21,10 @@ void putch(char data) {
 //    puts2USART((char *)data);
   Write2USART(data);
 }
+
+
+
+
 
 
 /* <Initialize variables in user.h and insert code for user algorithms.> */
