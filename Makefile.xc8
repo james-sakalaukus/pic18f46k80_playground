@@ -1,0 +1,48 @@
+# processor type
+CHIP = 18f46k80
+
+# directories for C files, H files, and build outputs
+SRC_DIR = ./src/
+INCLUDES = -I./inc/
+INCLUDES += -I/opt/microchip/xc8/v1.33/include/
+INCLUDES += -I/opt/microchip/xc8/v1.33/include/plib/
+#LIBS = -L./lib/
+LIBS = /opt/microchip/xc8/v1.33/lib/pic18-plib-htc-$(CHIP).lpp
+OUTPUT_DIR = ./tmp/
+
+# Output executable name
+EXEC = pic18f46k80_test
+
+SOURCES = $(wildcard $(SRC_DIR)*.c)
+OBJECTS = $(addprefix $(OUTPUT_DIR), $(notdir $(SOURCES:.c=.p1)))
+
+# generate warnings/errors suitable for CDT parser
+IDE_ERRORS = "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (%n) %s" "--msgformat=%f:%l: advisory: (%n) %s"
+
+# Compiler and flags 
+CC = /opt/microchip/xc8/v1.33/bin/xc8
+CC_FLAGS = --pass1 --chip=$(CHIP) -Q --mode=free --runtime=default,+clear,+init,-keep,-no_startup,-download,+config,+clib,+plib --output=elf:multilocs $(IDE_ERRORS)
+
+
+# linker and flags
+LINKER = /opt/microchip/xc8/v1.33/bin/xc8
+LINK_FLAGS = --chip=$(CHIP) -m$(EXEC).map --mode=free --runtime=default,+clear,+init,-keep,-no_startup,-download,+config,+clib,+plib --output=elf:multilocs $(IDE_ERRORS)
+
+
+
+
+print-%  : ; @echo $* = $($*)
+
+all: $(EXEC)
+ 
+# Main target
+$(EXEC): $(OBJECTS)
+	$(LINKER) $(LINK_FLAGS) $(OBJECTS) -o$(OUTPUT_DIR)$(EXEC).elf
+
+# To obtain object files
+$(OUTPUT_DIR)%.p1: $(SRC_DIR)%.c
+	$(CC) $(CC_FLAGS) $(INCLUDES) $< -o$@
+
+# To remove generated files
+clean:
+	rm -f $(EXEC) $(OBJECTS) $(OUTPUT_DIR)*
