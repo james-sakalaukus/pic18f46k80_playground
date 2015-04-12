@@ -14,7 +14,7 @@
 #include "system.h"
 #include <xc.h>
 //#include <delays.h>
-//#include "system.h"
+#include "user.h"
 
 /*---------------------------------------------------------------------------*/
 /* Type definitions for Microchip C18 Compiler                               */
@@ -97,41 +97,7 @@ static uint8 nRomAddr_au8[DS1820_ADDR_LEN];
 /* -------------------------------------------------------------------------- */
 
 
-/*******************************************************************************
- * FUNCTION:   DS1820_DelayUs
- * PURPOSE:    Delay for the given number of micro seconds.
- *
- * INPUT:      dly_us      number of micro seconds to delay
- * OUTPUT:     -
- * RETURN:     -
- ******************************************************************************/
-//#define DS1820_DelayUs(dly_us)       __delay_us(dly_us)
 
-// 11200 max value for _delay function
-void DS1820_DelayUs(unsigned long dly_us) {
-  unsigned long int i = 0;
-
-  for(; i<(16*dly_us); i++) {
-    NOP();
-//    _delay(dly_us);
-  }
-}
-
-/*******************************************************************************
- * FUNCTION:   DS1820_DelayMs
- * PURPOSE:    Delay for the given number of milliseconds.
- *
- * INPUT:      dly_ms      number of milliseconds to delay
- * OUTPUT:     -
- * RETURN:     -
- ******************************************************************************/
-//#define DS1820_DelayMs(dly_ms)   __delay_ms(dly_ms)
-void DS1820_DelayMs(unsigned long dly_ms) {
-  do {
-    DS1820_DelayUs(1);
-  } while(--dly_ms);
-
-}
 
 /*******************************************************************************
  * FUNCTION:   DS1820_DisableInterrupts
@@ -144,7 +110,7 @@ void DS1820_DelayMs(unsigned long dly_ms) {
 #ifdef DS1820_INTERRUPT_LOCK
 #define DS1820_DisableInterrupts()  disable_interrupts(GLOBAL)
 #else
-#define DS1820_DisableInterrupts()
+#define DS1820_DisableInterrupts() GIE = 0;
 #endif
 
 
@@ -160,7 +126,7 @@ void DS1820_DelayMs(unsigned long dly_ms) {
 #ifdef DS1820_INTERRUPT_LOCK
 #define DS1820_EnableInterrupts()   enable_interrupts(GLOBAL)
 #else
-#define DS1820_EnableInterrupts()
+#define DS1820_EnableInterrupts() GIE = 1;
 #endif
 
 
@@ -179,15 +145,15 @@ bool DS1820_Reset(void)
    DS1820_DisableInterrupts();
 
    /* reset pulse */
-   output_low(DS1820_DATAPIN);
+   output_low();
    DS1820_DelayUs(DS1820_RST_PULSE);
-   output_high(DS1820_DATAPIN);
+   output_high();
 
    /* wait until pullup pull 1-wire bus to high */
    DS1820_DelayUs(DS1820_PRESENCE_WAIT);
 
    /* get presence pulse */
-   bPresPulse = input(DS1820_DATAPIN);
+   bPresPulse = input();
 
    DS1820_DelayUs(424);
 
@@ -211,12 +177,12 @@ bool DS1820_ReadBit(void)
 
    DS1820_DisableInterrupts();
 
-   output_low(DS1820_DATAPIN);
+   output_low();
    DS1820_DelayUs(DS1820_MSTR_BITSTART);
-   input(DS1820_DATAPIN);
+   input();
    DS1820_DelayUs(DS1820_BITREAD_DLY);
 
-   bBit = input(DS1820_DATAPIN);
+   bBit = input();
 
    DS1820_EnableInterrupts();
 
@@ -236,16 +202,16 @@ void DS1820_WriteBit(bool bBit)
 {
    DS1820_DisableInterrupts();
 
-   output_low(DS1820_DATAPIN);
+   output_low();
    DS1820_DelayUs(DS1820_MSTR_BITSTART);
 
    if (bBit != FALSE)
    {
-      output_high(DS1820_DATAPIN);
+      output_high();
    }
 
    DS1820_DelayUs(DS1820_BITWRITE_DLY);
-   output_high(DS1820_DATAPIN);
+   output_high();
 
    DS1820_EnableInterrupts();
 }
@@ -575,7 +541,7 @@ sint16 DS1820_GetTempRaw(void)
     /* --- start temperature conversion -------------------------------------- */
     DS1820_Reset();
     DS1820_AddrDevice(DS1820_CMD_MATCHROM);     /* address the device */
-    output_high(DS1820_DATAPIN);
+    output_high();
     DS1820_WriteByte(DS1820_CMD_CONVERTTEMP);   /* start conversion */
     //DS1820_DelayMs(DS1820_TEMPCONVERT_DLY);   /* wait for temperature conversion */
     DS1820_DelayMs(750);

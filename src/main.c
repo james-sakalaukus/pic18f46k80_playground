@@ -22,15 +22,16 @@ char endLine[3] = "\n";
 char openString[] = "Hello from PIC18";
 
 /* --- configure DS1820 temperature sensor pin --- */
-#define DS1820_DATAPIN      PORTBbits.RB3
-#define output_low(pin)     TRISBbits.TRISB3 = 0;(PORTBbits.RB3 = 0)
-#define output_high(pin)    TRISBbits.TRISB3 = 0;(PORTBbits.RB3 = 1)
-#define input(pin)          input_func()
+#define DS1820_DATAPIN      PORTCbits.RC4
+#define output_low()     TRISCbits.TRISC4 = 0;(LATCbits.LATC4 = 0)
+#define output_high()    TRISCbits.TRISC4 = 0;(LATCbits.LATC4 = 1)
+#define input()          input_func()
 bool input_func(void)
 {
-    TRISBbits.TRISB3 = 1;
-    return (PORTBbits.RB3);
+  TRISCbits.TRISC4 = 1;
+    return (PORTCbits.RC4);
 }
+
 
 #include "ds1820.h"
 
@@ -86,6 +87,9 @@ void main(void)
 
   while(1) {
     
+//    DS1820_DelayMs(1000);
+//    doHeartBeat();
+
     if(characterReceived) {
       characterReceived = 0;
       printf("\n");
@@ -93,6 +97,21 @@ void main(void)
         index = i*2;
         sensorValue = ((uint8_t)temperature[index] * 256) + (uint8_t)temperature[index+1];
         printf("ADC %d is: %u\r\n", i, sensorValue);
+      }
+
+      if(DS1820_FindFirstDevice()) {
+        DS1820_FOUND = true;
+        printf("Found first DS1820 device\n");
+        temperature_raw = DS1820_GetTempRaw();
+        DS1820_GetTempString(temperature_raw, temperature_string);
+        temperature_float = DS1820_GetTempFloat();
+
+        printf("DS1820 Sensor Temperature: %s?C \n\r", temperature_string);
+        printf("DS1820 Sensor Temperature Float: %f \n\r", temperature_float);
+        printf("DS1820 Sensor Temperature Raw: %ld \n\r", temperature_raw);
+      } else {
+        DS1820_FOUND = false;
+        printf("Could not find first DS1820 device\n");
       }
     }
 
@@ -104,15 +123,10 @@ void main(void)
       unhandledIRQ = 0;
     }
 
-    if ( DS1820_FOUND ) {
-      temperature_raw = DS1820_GetTempRaw();
-      DS1820_GetTempString(temperature_raw, temperature_string);
-      temperature_float = DS1820_GetTempFloat();
 
-      printf("DS1820 Sensor Temperature: %s?C \n\r", temperature_string);
-      printf("DS1820 Sensor Temperature Float: %f \n\r", temperature_float);
-      printf("DS1820 Sensor Temperature Raw: %ld \n\r", temperature_raw);
-    }
+//    if ( DS1820_FOUND ) {
+//
+//    }
 
   }
 }

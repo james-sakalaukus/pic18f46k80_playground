@@ -30,5 +30,8 @@ void InitApp(void);         /* I/O and Peripheral Initialization */
 void delay();
 void doHeartBeat();
 
+void DS1820_DelayMs(unsigned long dly_ms);
+//void DS1820_DelayUs(unsigned long dly_us);
+#define DS1820_DelayUs(dly_us)       __delay_us(dly_us)
 
 #endif

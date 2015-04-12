@@ -17,6 +17,41 @@
 /* User Functions                                                             */
 /******************************************************************************/
 
+/*******************************************************************************
+ * FUNCTION:   DS1820_DelayUs
+ * PURPOSE:    Delay for the given number of micro seconds.
+ *
+ * INPUT:      dly_us      number of micro seconds to delay
+ * OUTPUT:     -
+ * RETURN:     -
+ ******************************************************************************/
+//#define DS1820_DelayUs(dly_us)       __delay_us(dly_us)
+
+//// 11200 max value for _delay function
+//void DS1820_DelayUs(unsigned long dly_us) {
+//  unsigned long int i = 0;
+//
+//  for(; i<(16*dly_us); i++) {
+//    NOP();
+////    _delay(dly_us);
+//  }
+//}
+
+/*******************************************************************************
+ * FUNCTION:   DS1820_DelayMs
+ * PURPOSE:    Delay for the given number of milliseconds.
+ *
+ * INPUT:      dly_ms      number of milliseconds to delay
+ * OUTPUT:     -
+ * RETURN:     -
+ ******************************************************************************/
+//#define DS1820_DelayMs(dly_ms)   __delay_ms(dly_ms)
+void DS1820_DelayMs(unsigned long dly_ms) {
+//  dly_ms = dly_ms * 16;
+  do {
+    DS1820_DelayUs(999);
+  } while(--dly_ms);
+}
 
 
 // Used in printf()
@@ -33,13 +68,14 @@ void InitApp(void)
     TRISDbits.TRISD2 = 0;
 
     // temperature sensor
-    TRISDbits.TRISD3 = 0;
-    TRISCbits.TRISC4 = 0;
+    //    TRISCbits.TRISC4 = 0;
     TRISCbits.TRISC5 = 0;
+    TRISCbits.TRISC6 = 0;
     
-    LATCbits.LATC4 = 1;
-    LATDbits.LATD3 = 0;
+    LATCbits.LATC5 = 1;
+    LATCbits.LATC6 = 0;
     
+
     /******************** ADC Setup ************************************/
     // use RA0:3, RA5, RE0 as analog inputs
     TRISAbits.TRISA0 = 1;
@@ -73,11 +109,7 @@ void InitApp(void)
   
       //----Configure Timers----
     WriteTimer0(0); //clear timer if previously contains any value
-    OpenTimer0(TIMER_INT_ON | T0_16BIT | T0_SOURCE_INT | T0_PS_1_32);
-  
-  
-  
-  
+    OpenTimer0(TIMER_INT_ON & T0_16BIT & T0_SOURCE_INT & T0_PS_1_256);
   
     // configure UART2  
     TRISDbits.TRISD6 = 0;   // TX
@@ -98,8 +130,9 @@ void InitApp(void)
     
     /* Enable interrupts */
     IPEN = 1;
-    GIE = 1;
+
     PEIE = 1;               // enable peripheral interrupts
+    GIE = 1;
 
     unhandledIRQ = 0;
     characterReceived = 0;
