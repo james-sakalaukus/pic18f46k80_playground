@@ -5,14 +5,35 @@
  *      Author: james
  */
 
+#include <user.h>
+#include <pic18f46k80.h>
+
+#define PORT_WRITE LATBbits.LATB7
+#define PORT_TRIS TRISBbits.TRISB7
+#define PORT_READ PORTBbits.PORTB7
+#define PORTADDRESS PORTB
 
 // http://www.maximintegrated.com/en/app-notes/index.mvp/id/126
 
+//typedef struct {
+//  unsigned TRIS:1;
+//  unsigned PORT:1;
+//  unsigned LAT:1;
+//} generic_io_pin;
+
+//generic_io_pin oneWirePin = {.TRIS = PORT_TRIS, .PORT = PORT_READ, .LAT = PORT_WRITE};
+
 // send 'databyte' to 'port'
-int outp(unsigned port, int databyte);
+int outp(unsigned port, int databyte) {
+  PORT_TRIS = 0;
+  return PORT_WRITE = databyte;
+}
 
 // read byte from 'port'
-int inp(unsigned port);
+int inp(unsigned port){
+  PORT_TRIS = 1;
+  return PORT_READ;
+}
 
 // Pause for exactly 'tick' number of ticks = 0.25us
 void tickDelay(int tick); // Implementation is platform specific

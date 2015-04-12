@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>pic18f46k80_playground.git</name>
+	<name>pic18f46k80_playground</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -24,11 +24,4 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>include</name>
-			<type>2</type>
-			<location>/opt/microchip/xc8/v1.34/include</location>
-		</link>
-	</linkedResources>
 </projectDescription>

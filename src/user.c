@@ -11,24 +11,19 @@
 
  #include <plib.h>
 
-//#include "ds1820.h"
+
 
 /******************************************************************************/
 /* User Functions                                                             */
 /******************************************************************************/
+
+
+
+// Used in printf()
 void putch(char data) {
   while(Busy2USART());
-//    puts2USART((char *)data);
   Write2USART(data);
 }
-
-
-
-
-
-
-/* <Initialize variables in user.h and insert code for user algorithms.> */
-
 
 
 
@@ -106,6 +101,8 @@ void InitApp(void)
     GIE = 1;
     PEIE = 1;               // enable peripheral interrupts
 
+    unhandledIRQ = 0;
+    characterReceived = 0;
 }
 
 void doHeartBeat(void) {

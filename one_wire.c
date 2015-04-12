@@ -23,6 +23,7 @@ struct ds18b20 *next;
 
 // Find connected 1-wire devices. 1-wire driver creates entries for each device
 // in /sys/bus/w1/devices on Beaglebone Black.  Create linked list.
+
 int8_t findDevices(struct ds18b20 *d) {
 DIR *dir;
         struct dirent *dirent;
