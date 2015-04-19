@@ -16,11 +16,21 @@
 /* Global Variables                                                           */
 /******************************************************************************/
 
-volatile char characterReceived;
-volatile char unhandledIRQ;
+volatile unsigned char uart1CharacterReceived;
+volatile unsigned char uart2CharacterReceived;
+volatile unsigned char unhandledIRQ;
+volatile unsigned char receivedCharacter;
 
 // 6 16-bit temperature values
 volatile uint8_t temperature[12];
+
+/* --- configure DS1820 temperature sensor pin --- */
+#define DS1820_DATAPIN      PORTCbits.RC5
+#define output_low()     TRISCbits.TRISC5 = 0;(LATCbits.LATC5 = 0)
+#define output_high()    TRISCbits.TRISC5 = 0;(LATCbits.LATC5 = 1)
+#define input()          input_func()
+bool input_func(void);
+
 
 /******************************************************************************/
 /* User Function Prototypes                                                   */

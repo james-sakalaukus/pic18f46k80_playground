@@ -24,4 +24,11 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>include</name>
+			<type>2</type>
+			<location>/opt/microchip/xc8/v1.34/include</location>
+		</link>
+	</linkedResources>
 </projectDescription>

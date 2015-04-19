@@ -20,12 +20,17 @@ char pulseLed = 0;
 void interrupt high_isr(void) {
 
   /* Determine which flag generated the interrupt */
-      
-  if (RC2IF) {
+  if (RC1IF) {
+
+      RC1IF=0; // Clear Interrupt Flag
+      uart1CharacterReceived = 1;
+      Read1USART();
+
+  } else if (RC2IF) {
     
       RC2IF=0; // Clear Interrupt Flag
-      characterReceived = 1;
-      Read2USART();
+      uart2CharacterReceived = 1;
+      receivedCharacter = Read2USART();
   
   } else if(TMR0IF) {
     TMR0IF = 0;

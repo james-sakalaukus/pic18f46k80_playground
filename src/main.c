@@ -9,33 +9,26 @@
 #include <plib.h>
 #include <delays.h>
 #include <adc.h>
+#include <string.h>
+#include <pic18f46k80.h>
 
 #include "system.h"        /* System funct/params, like osc/peripheral config */
 #include "user.h"          /* User funct/params, such as InitApp */
 
-#include <pic18f46k80.h>
 
+#include "ds1820.h"
 /******************************************************************************/
 /* User Global Variable Declaration                                           */
 /******************************************************************************/
 char endLine[3] = "\n";
 char openString[] = "Hello from PIC18";
 
-/* --- configure DS1820 temperature sensor pin --- */
-#define DS1820_DATAPIN      PORTCbits.RC4
-#define output_low()     TRISCbits.TRISC4 = 0;(LATCbits.LATC4 = 0)
-#define output_high()    TRISCbits.TRISC4 = 0;(LATCbits.LATC4 = 1)
-#define input()          input_func()
-bool input_func(void)
-{
-  TRISCbits.TRISC4 = 1;
-    return (PORTCbits.RC4);
-}
 
 
-#include "ds1820.h"
+void writeDisplay(void);
+void readTempSensor(void);
+void readAnalogs(void);
 
-/* --- end configure DS1820 temperature sensor pin --- */
 
 /******************************************************************************/
 /* Main Program                                                               */
@@ -43,13 +36,8 @@ bool input_func(void)
 
 void main(void)
 {
-  uint8_t index = 0;
-  int i = 0;
-  uint16_t sensorValue;
 
-  int16_t temperature_raw;
-  float temperature_float;
-  char temperature_string[8];
+  int i = 0;
 
 
   /* Configure the oscillator for the device */
@@ -59,59 +47,29 @@ void main(void)
   InitApp();
 
 
-  Delay10KTCYx(128);
-  Delay10KTCYx(128);
-  Delay10KTCYx(128);
-  Delay10KTCYx(128);
-  Delay10KTCYx(128);
-  Delay10KTCYx(128);
+  DS1820_DelayMs(1000);
+
   printf("\r\n");
   printf("\r\n");
   printf("Oscillator and Peripherals initialized!\r\n");
 
-
-
   // start a conversion
   GODONE = 1;
 
-  bool DS1820_FOUND;
-
-  // populate sensor ID
-  if(DS1820_FindFirstDevice()) {
-    DS1820_FOUND = true;
-    printf("Found first DS1820 device\n");
-  } else {
-    DS1820_FOUND = false;
-    printf("Could not find first DS1820 device\n");
-  }
-
   while(1) {
     
-//    DS1820_DelayMs(1000);
-//    doHeartBeat();
+    if(uart2CharacterReceived) {
+      uart2CharacterReceived = 0;
+      switch (receivedCharacter) {
+        case 'd':
+          writeDisplay();
+          break;
+        case 'a':
+          readAnalogs();
+          break;
 
-    if(characterReceived) {
-      characterReceived = 0;
-      printf("\n");
-      for(i=0; i<6; i++) {
-        index = i*2;
-        sensorValue = ((uint8_t)temperature[index] * 256) + (uint8_t)temperature[index+1];
-        printf("ADC %d is: %u\r\n", i, sensorValue);
-      }
-
-      if(DS1820_FindFirstDevice()) {
-        DS1820_FOUND = true;
-        printf("Found first DS1820 device\n");
-        temperature_raw = DS1820_GetTempRaw();
-        DS1820_GetTempString(temperature_raw, temperature_string);
-        temperature_float = DS1820_GetTempFloat();
-
-        printf("DS1820 Sensor Temperature: %s?C \n\r", temperature_string);
-        printf("DS1820 Sensor Temperature Float: %f \n\r", temperature_float);
-        printf("DS1820 Sensor Temperature Raw: %ld \n\r", temperature_raw);
-      } else {
-        DS1820_FOUND = false;
-        printf("Could not find first DS1820 device\n");
+        default:
+          readTempSensor();
       }
     }
 
@@ -123,10 +81,75 @@ void main(void)
       unhandledIRQ = 0;
     }
 
+  }
+}
+void writeDisplay(void) {
 
-//    if ( DS1820_FOUND ) {
+  // clear screen - "X"
+  // go home - "H"
+//  unsigned char unlock[] = {0xFE, 0xCA, 0xF5, 0xA0, 0x00};
+//  unsigned char display_on[] = {0xFE, 0x42, 0x00};  //Command bytes to turn display on
+  unsigned char clear_screen[] = {254, 88};    //Command bytes to clear screen
+  unsigned char message[] = "Hello World!";     //Message string
+  unsigned char set_baudrate[] = {254, 57, 8};    // set to 115200
+
+//  for(int i=0; i<5; i++) {
+//    while(Busy1USART());
+//    Write1USART(unlock[i]);
+//  }
 //
-//    }
+//  while(Busy1USART());
+//  Write1USART(set_baudrate[0]);
+//  while(Busy1USART());
+//  Write1USART(set_baudrate[1]);
+//  while(Busy1USART());
+//  Write1USART(set_baudrate[2]);
+//
+  while(Busy1USART());
+  Write1USART(clear_screen[0]);
+  while(Busy1USART());
+  Write1USART(clear_screen[1]);
 
+  printf("Message length is : %d\r\n", strlen(message));
+
+  for(int i=0; i<strlen(message); i++) {
+    while(Busy1USART());
+    Write1USART(message[i]);
+    while(Busy2USART());
+    Write2USART(message[i]);
+  }
+}
+
+void readTempSensor(void) {
+
+  int16_t temperature_raw;
+  float temperature_float;
+  char temperature_string[8];
+  bool DS1820_FOUND;
+
+  if(DS1820_FindFirstDevice()) {
+    DS1820_FOUND = true;
+//        printf("Found first DS1820 device\n");
+    temperature_raw = DS1820_GetTempRaw();
+//        DS1820_GetTempString(temperature_raw, temperature_string);
+    temperature_float = DS1820_GetTempFloat();
+    temperature_float = ((temperature_float * 9)/5)+32;
+
+//        printf("DS1820 Sensor Temperature: %s?C \n\r", temperature_string);
+    printf("DS1820 Sensor Temperature F: %f \r\n", temperature_float);
+//        printf("DS1820 Sensor Temperature Raw: %ld \n\r", temperature_raw);
+  } else {
+    DS1820_FOUND = false;
+    printf("Could not find first DS1820 device\r\n");
+  }
+}
+
+void readAnalogs(void) {
+  uint16_t sensorValue;
+  uint8_t index = 0;
+  for(int i=0; i<6; i++) {
+    index = i*2;
+    sensorValue = ((uint8_t)temperature[index] * 256) + (uint8_t)temperature[index+1];
+    printf("ADC %d is: %u\r\n", i, sensorValue);
   }
 }

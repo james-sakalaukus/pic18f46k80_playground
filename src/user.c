@@ -9,9 +9,9 @@
 #include "user.h"
 #include "system.h"
 
- #include <plib.h>
+#include <plib.h>
 
-
+#include <pic18f46k80.h>
 
 /******************************************************************************/
 /* User Functions                                                             */
@@ -58,22 +58,31 @@ void DS1820_DelayMs(unsigned long dly_ms) {
 void putch(char data) {
   while(Busy2USART());
   Write2USART(data);
+  while(Busy1USART());
+  Write1USART(data);
 }
 
 
 
 void InitApp(void)
 {
+
+  /******************** Hearbeat LED Setup ************************************/
     // Initialize heartbeat led as output
     TRISDbits.TRISD2 = 0;
 
-    // temperature sensor
-    //    TRISCbits.TRISC4 = 0;
-    TRISCbits.TRISC5 = 0;
-    TRISCbits.TRISC6 = 0;
+    /******************** Temperature Sensor Setup ************************************/
+    // 3-pins: Sensor, VDD, GND
+    // RC5, RC4, RD3
+    // RC5 is set with macros defined in user.h; used by ds1820.h functions
+
+    // Sensor VDD Output
+    TRISCbits.TRISC4 = 0;
+    LATCbits.LATC4 = 1;
     
-    LATCbits.LATC5 = 1;
-    LATCbits.LATC6 = 0;
+    // Sensor GND Output
+    TRISDbits.TRISD3 = 0;
+    LATDbits.LATD3 = 0;
     
 
     /******************** ADC Setup ************************************/
@@ -94,6 +103,7 @@ void InitApp(void)
     
     // right justified, 0 TAD, F RC (clock derived from A/D RC oscillator)
     ADCON2 = 0b10000111;
+
     // set AN0-5 as an analog inputs
     ANSEL0 = 1;
     ANSEL1 = 1;
@@ -107,11 +117,33 @@ void InitApp(void)
     // enable ADC interrupt
     ADIE = 1;
   
-      //----Configure Timers----
+    /******************** Timer 0 Setup ************************************/
+
+    WriteTimer0(0); //clear timer if previously contains any value
+    OpenTimer0(TIMER_INT_ON & T0_16BIT & T0_SOURCE_INT & T0_PS_1_256);
+
+    /******************** Timer 1 Setup ************************************/
+
     WriteTimer0(0); //clear timer if previously contains any value
     OpenTimer0(TIMER_INT_ON & T0_16BIT & T0_SOURCE_INT & T0_PS_1_256);
   
-    // configure UART2  
+    /******************** UART1 Setup ************************************/
+    TRISCbits.TRISC6 = 0;   // TX
+    TRISCbits.TRISC7 = 1;   // RX
+    RC1IP = 1;              // high priority interrupt
+    RC1IF = 1;              // clear RX interrupt
+    RC1IE = 1;              // enable RX interrupt
+
+    //Configure the serial port
+    Open1USART( USART_TX_INT_OFF &
+                USART_RX_INT_ON &
+                USART_ASYNCH_MODE &
+                USART_EIGHT_BIT &
+                USART_CONT_RX &
+                USART_BRGH_HIGH,
+                BAUDRATEREG1);
+
+    /******************** UART2 Setup ************************************/
     TRISDbits.TRISD6 = 0;   // TX
     TRISDbits.TRISD7 = 1;   // RX
     RC2IP = 1;              // high priority interrupt
@@ -125,7 +157,7 @@ void InitApp(void)
                 USART_EIGHT_BIT &
                 USART_CONT_RX &
                 USART_BRGH_HIGH,
-                BAUDRATEREG);
+                BAUDRATEREG2);
     
     
     /* Enable interrupts */
@@ -134,10 +166,17 @@ void InitApp(void)
     PEIE = 1;               // enable peripheral interrupts
     GIE = 1;
 
+    // initialize global variables
     unhandledIRQ = 0;
-    characterReceived = 0;
+    uart1CharacterReceived = 0;
+    uart2CharacterReceived = 0;
 }
 
 void doHeartBeat(void) {
     heartbeat = ~heartbeat;
+}
+
+bool input_func(void) {
+  TRISCbits.TRISC5 = 1;
+    return (PORTCbits.RC5);
 }

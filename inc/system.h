@@ -12,7 +12,8 @@
 #define FCYC (FOSC/4L)
 #define _XTAL_FREQ FOSC
 
-#define BAUDRATE    57600L
+#define BAUDRATE1    115200L
+#define BAUDRATE2    57600L
 #define USE_HI_SPEED_BRG            //Use BRGH=1, UART high speed mode
 
 //UART Baud Rate Calculation *******************************************************
@@ -22,18 +23,29 @@
     #define BRG_DIV 16L
 #endif
 
-#define BAUDRATEREG    ( ((FCYC + (BRG_DIV * BAUDRATE / 2L)) / (BRG_DIV * BAUDRATE)) - 1L)
-#define BAUD_ACTUAL    (FCYC / BRG_DIV / (BAUDRATEREG+1))
+#define BAUDRATEREG1    ( ((FCYC + (BRG_DIV * BAUDRATE1 / 2L)) / (BRG_DIV * BAUDRATE1)) - 1L)
+#define BAUD_ACTUAL1    (FCYC / BRG_DIV / (BAUDRATEREG1+1))
 
-#define BAUD_ERROR          ((BAUD_ACTUAL > BAUDRATE) ? BAUD_ACTUAL-BAUDRATE : BAUDRATE-BAUD_ACTUAL)
-#define BAUD_ERROR_PRECENT  ((BAUD_ERROR * 100L + (BAUDRATE / 2L)) / BAUDRATE)
+#define BAUD_ERROR1          ((BAUD_ACTUAL1 > BAUDRATE1) ? BAUD_ACTUAL1-BAUDRATE1 : BAUDRATE1-BAUD_ACTUAL1)
+#define BAUD_ERROR_PRECENT1  ((BAUD_ERROR1 * 100L + (BAUDRATE1 / 2L)) / BAUDRATE1)
 
-#if (BAUD_ERROR_PRECENT > 3)
+#if (BAUD_ERROR_PRECENT1 > 3)
     #error "UART frequency error is worse than 3%"
-#elif (BAUD_ERROR_PRECENT > 2)
+#elif (BAUD_ERROR_PRECENT1 > 2)
     #warning "UART frequency error is worse than 2%"
 #endif
 
+#define BAUDRATEREG2    ( ((FCYC + (BRG_DIV * BAUDRATE2 / 2L)) / (BRG_DIV * BAUDRATE2)) - 1L)
+#define BAUD_ACTUAL2    (FCYC / BRG_DIV / (BAUDRATEREG2+1))
+
+#define BAUD_ERROR2          ((BAUD_ACTUAL2 > BAUDRATE2) ? BAUD_ACTUAL2-BAUDRATE2 : BAUDRATE2-BAUD_ACTUAL2)
+#define BAUD_ERROR_PRECENT2  ((BAUD_ERROR2 * 100L + (BAUDRATE2 / 2L)) / BAUDRATE2)
+
+#if (BAUD_ERROR_PRECENT2 > 3)
+    #error "UART frequency error is worse than 3%"
+#elif (BAUD_ERROR_PRECENT2 > 2)
+    #warning "UART frequency error is worse than 2%"
+#endif
 /******************************************************************************/
 /* System Function Prototypes                                                 */
 /******************************************************************************/

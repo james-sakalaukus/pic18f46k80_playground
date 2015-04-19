@@ -42,7 +42,7 @@ $(OUTPUT_DIR)$(EXEC).hex: $(OBJECTS)
 	$(LINKER) $(LINK_FLAGS) $(OBJECTS) -o$(OUTPUT_DIR)$(EXEC)
 
 # To obtain object files
-$(OUTPUT_DIR)%.p1: $(SRC_DIR)%.c
+$(OUTPUT_DIR)%.p1: $(SRC_DIR)%.c 
 	$(CC) $(CC_FLAGS) $(INCLUDES) $< -o$@
 
 # To remove generated files
