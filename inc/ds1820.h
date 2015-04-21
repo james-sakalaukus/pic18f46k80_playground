@@ -110,7 +110,8 @@ static uint8 nRomAddr_au8[DS1820_ADDR_LEN];
 #ifdef DS1820_INTERRUPT_LOCK
 #define DS1820_DisableInterrupts()  disable_interrupts(GLOBAL)
 #else
-#define DS1820_DisableInterrupts() GIE = 0;
+//#define DS1820_DisableInterrupts() GIE = 0;
+#define DS1820_DisableInterrupts()
 #endif
 
 
@@ -126,7 +127,8 @@ static uint8 nRomAddr_au8[DS1820_ADDR_LEN];
 #ifdef DS1820_INTERRUPT_LOCK
 #define DS1820_EnableInterrupts()   enable_interrupts(GLOBAL)
 #else
-#define DS1820_EnableInterrupts() GIE = 1;
+//#define DS1820_EnableInterrupts() GIE = 1;
+#define DS1820_EnableInterrupts()
 #endif
 
 

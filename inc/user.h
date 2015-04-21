@@ -20,14 +20,20 @@ volatile unsigned char uart1CharacterReceived;
 volatile unsigned char uart2CharacterReceived;
 volatile unsigned char unhandledIRQ;
 volatile unsigned char receivedCharacter;
+volatile unsigned char updateDisplay;
+volatile unsigned char DS1820_FOUND;
 
 // 6 16-bit temperature values
 volatile uint8_t temperature[12];
 
 /* --- configure DS1820 temperature sensor pin --- */
-#define DS1820_DATAPIN      PORTCbits.RC5
-#define output_low()     TRISCbits.TRISC5 = 0;(LATCbits.LATC5 = 0)
-#define output_high()    TRISCbits.TRISC5 = 0;(LATCbits.LATC5 = 1)
+//#define DS1820_DATAPIN      PORTCbits.RC5
+//#define output_low()     TRISCbits.TRISC5 = 0;(LATCbits.LATC5 = 0)
+//#define output_high()    TRISCbits.TRISC5 = 0;(LATCbits.LATC5 = 1)
+#define DS1820_DATAPIN      PORTAbits.RA0
+#define output_low()     TRISAbits.TRISA0 = 0;(LATAbits.LATA0 = 0)
+#define output_high()    TRISAbits.TRISA0 = 0;(LATAbits.LATA0 = 1)
+
 #define input()          input_func()
 bool input_func(void);
 

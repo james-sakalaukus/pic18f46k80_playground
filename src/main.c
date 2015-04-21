@@ -26,9 +26,9 @@ char openString[] = "Hello from PIC18";
 
 
 void writeDisplay(void);
-void readTempSensor(void);
+float readTempSensor(void);
 void readAnalogs(void);
-
+void clearScreen(void);
 
 /******************************************************************************/
 /* Main Program                                                               */
@@ -53,8 +53,15 @@ void main(void)
   printf("\r\n");
   printf("Oscillator and Peripherals initialized!\r\n");
 
+
+
+  if(DS1820_FindFirstDevice()) {
+    printf("Found a DS1820 Device!\r\n");
+    DS1820_FOUND = true;
+  }
+
   // start a conversion
-  GODONE = 1;
+//  GODONE = 1;
 
   while(1) {
     
@@ -80,9 +87,22 @@ void main(void)
       printf("A low priority IRQ was ignored\n");
       unhandledIRQ = 0;
     }
-
+    if(updateDisplay){
+//      clearScreen();
+//      readTempSensor();
+      printf("%c%cDS1820_0: F: %2.2f \r\n", 254, 88,readTempSensor());
+      updateDisplay = 0;
+    }
   }
 }
+void clearScreen(void) {
+  unsigned char clear_screen[] = {254, 88};    //Command bytes to clear screen
+  while(Busy1USART());
+  Write1USART(clear_screen[0]);
+  while(Busy1USART());
+  Write1USART(clear_screen[1]);
+}
+
 void writeDisplay(void) {
 
   // clear screen - "X"
@@ -120,27 +140,25 @@ void writeDisplay(void) {
   }
 }
 
-void readTempSensor(void) {
+float readTempSensor(void) {
 
-  int16_t temperature_raw;
   float temperature_float;
-  char temperature_string[8];
-  bool DS1820_FOUND;
 
-  if(DS1820_FindFirstDevice()) {
-    DS1820_FOUND = true;
-//        printf("Found first DS1820 device\n");
-    temperature_raw = DS1820_GetTempRaw();
-//        DS1820_GetTempString(temperature_raw, temperature_string);
+  if(DS1820_FOUND) {
     temperature_float = DS1820_GetTempFloat();
     temperature_float = ((temperature_float * 9)/5)+32;
+    return temperature_float;
 
-//        printf("DS1820 Sensor Temperature: %s?C \n\r", temperature_string);
-    printf("DS1820 Sensor Temperature F: %f \r\n", temperature_float);
-//        printf("DS1820 Sensor Temperature Raw: %ld \n\r", temperature_raw);
+  } else if(DS1820_FindFirstDevice()) {
+    DS1820_FOUND = 1;
+    temperature_float = DS1820_GetTempFloat();
+    temperature_float = ((temperature_float * 9)/5)+32;
+    return temperature_float;
+
   } else {
-    DS1820_FOUND = false;
+    DS1820_FOUND = 0;
     printf("Could not find first DS1820 device\r\n");
+    return 0;
   }
 }
 

@@ -27,7 +27,6 @@ uint8_t DS1820_Reset(void)
 {
    uint8_t bPresPulse;
 
-   DS1820_DisableInterrupts();
 
    /* reset pulse */
    output_low();
@@ -42,7 +41,6 @@ uint8_t DS1820_Reset(void)
 
    DS1820_DelayUs(424);
 
-   DS1820_EnableInterrupts();
 
    return bPresPulse;
 }
@@ -60,8 +58,6 @@ uint8_t DS1820_ReadBit(void)
 {
    uint8_t bBit;
 
-   DS1820_DisableInterrupts();
-
    output_low();
    DS1820_DelayUs(DS1820_MSTR_BITSTART);
    input();
@@ -69,7 +65,6 @@ uint8_t DS1820_ReadBit(void)
 
    bBit = input();
 
-   DS1820_EnableInterrupts();
 
    return (bBit);
 }
@@ -85,7 +80,6 @@ uint8_t DS1820_ReadBit(void)
  ******************************************************************************/
 void DS1820_WriteBit(uint8_t bBit)
 {
-   DS1820_DisableInterrupts();
 
    output_low();
    DS1820_DelayUs(DS1820_MSTR_BITSTART);
@@ -98,7 +92,6 @@ void DS1820_WriteBit(uint8_t bBit)
    DS1820_DelayUs(DS1820_BITWRITE_DLY);
    output_high();
 
-   DS1820_EnableInterrupts();
 }
 
 
