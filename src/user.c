@@ -67,7 +67,9 @@ void InitApp(void)
     // 3-pins: Sensor, VDD, GND
     // RA0:2
     // RA0 is set with macros defined in user.h; used by ds1820.h functions
-
+    // make sure to make pins digital
+    ADCON0 = 0xFC;
+    ADCON1 = 0;
     TRISAbits.TRISA1 = 0;
     LATAbits.LATA1 = 1;
     TRISAbits.TRISA2 = 0;
