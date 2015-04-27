@@ -16,15 +16,15 @@
 /******************************************************************************/
 /* User Functions                                                             */
 /******************************************************************************/
-//bool input_func(void) {
-//  TRISCbits.TRISC5 = 1;
-//    return (PORTCbits.RC5);
-//}
-
 bool input_func(void) {
-  TRISAbits.TRISA0 = 1;
-    return (PORTAbits.RA0);
+  TRISCbits.TRISC5 = 1;
+    return (PORTCbits.RC5);
 }
+
+//bool input_func(void) {
+//  TRISAbits.TRISA0 = 1;
+//    return (PORTAbits.RA0);
+//}
 
 void DS1820_DelayMs(unsigned long dly_ms) {
   do {
@@ -68,10 +68,12 @@ void InitApp(void)
     // RA0:2
     // RA0 is set with macros defined in user.h; used by ds1820.h functions
     // make sure to make pins digital
-    ADCON0 = 0xFC;
+//    ADCON0 = 0xFC;
     ADCON1 = 0;
+    // Sensor VDD is RA1
     TRISAbits.TRISA1 = 0;
     LATAbits.LATA1 = 1;
+    // Sensor GND is RA2
     TRISAbits.TRISA2 = 0;
     LATAbits.LATA2 = 0;
 
