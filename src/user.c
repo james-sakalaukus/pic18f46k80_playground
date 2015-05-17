@@ -13,24 +13,62 @@
 
 #include <pic18f46k80.h>
 
+
 /******************************************************************************/
 /* User Functions                                                             */
 /******************************************************************************/
-bool input_func(void) {
-  TRISCbits.TRISC5 = 1;
-    return (PORTCbits.RC5);
-}
 
-//bool input_func(void) {
-//  TRISAbits.TRISA0 = 1;
-//    return (PORTAbits.RA0);
-//}
 
-void DS1820_DelayMs(unsigned long dly_ms) {
+void DelayMs(unsigned long dly_ms) {
   do {
-    DS1820_DelayUs(999);
+    DelayUs(999);
   } while(--dly_ms);
 }
+
+// TODO: Why did RD2, RD3 not work for 1-wire sensors???
+// I think the heart beat LED was pulling too much current from PORTD - this port has lower limits than PORT A, B, C
+
+void output_temp_sensors(uint8_t value, uint8_t busNum) {
+  switch(busNum) {
+    case 0:
+      TRISCbits.TRISC2 = 0;
+      LATCbits.LATC2 = value;
+      break;
+    case 1:
+      TRISCbits.TRISC3 = 0;
+      LATCbits.LATC3 = value;
+      break;
+    case 2:
+      TRISCbits.TRISC4 = 0;
+      LATCbits.LATC4 = value;
+      break;
+    case 3:
+      TRISCbits.TRISC5 = 0;
+      LATCbits.LATC5 = value;
+      break;
+    default: break;
+  }
+}
+
+uint8_t input_temp_senosrs(int8_t busNum) {
+  switch(busNum) {
+    case 0:
+      TRISCbits.TRISC2 = 1;
+      return PORTCbits.RC2;
+    case 1:
+      TRISCbits.TRISC3 = 1;
+      return PORTCbits.RC3;
+    case 2:
+      TRISCbits.TRISC4 = 1;
+      return PORTCbits.RC4;
+    case 3:
+      TRISCbits.TRISC5 = 1;
+      return PORTCbits.RC5;
+    default:
+      return -1;
+  }
+}
+
 
 
 // Used in printf()
@@ -44,6 +82,8 @@ void putch(char data) {
 void InitApp(void)
 {
   uint8_t config0, config1;
+  uint8_t i;
+
   config0 = 0;
   config1 = 0;
 
@@ -51,63 +91,37 @@ void InitApp(void)
     // Initialize heartbeat led as output
     TRISDbits.TRISD2 = 0;
 
-    /******************** Temperature Sensor Setup ************************************/
-    // 3-pins: Sensor, VDD, GND
-    // RC5, RC4, RD3
-    // RC5 is set with macros defined in user.h; used by ds1820.h functions
+    /******************** ADC Setup ************************************/
+    // use RA0:3, RA5, RE0 as analog inputs
+    TRISAbits.TRISA0 = 1;
+    TRISAbits.TRISA1 = 1;
+    TRISAbits.TRISA2 = 1;
+    TRISAbits.TRISA3 = 1;
+    TRISAbits.TRISA5 = 1;
+    TRISEbits.TRISE0 = 1;
+    TRISE = 255; // all inputs
+    REPU = 0;   // disable PORT E pull-ups
 
-    // Sensor VDD Output
-    TRISCbits.TRISC4 = 0;
-    LATCbits.LATC4 = 1;
-    
-    // Sensor GND Output
-    TRISDbits.TRISD3 = 0;
-    LATDbits.LATD3 = 0;
-    
-    // 3-pins: Sensor, VDD, GND
-    // RA0:2
-    // RA0 is set with macros defined in user.h; used by ds1820.h functions
-    // make sure to make pins digital
-//    ADCON0 = 0xFC;
-    ADCON1 = 0;
-    // Sensor VDD is RA1
-    TRISAbits.TRISA1 = 0;
-    LATAbits.LATA1 = 1;
-    // Sensor GND is RA2
-    TRISAbits.TRISA2 = 0;
-    LATAbits.LATA2 = 0;
+    // configure ADC to use AN0,DONE, and turn on ADC
+    ADCON0 = 0b00000001;
+    // configure ctmu "special trigger", Internal VREF 4.1, AVss, AVss
+    ADCON1 = 0b01000000;
 
-//    /******************** ADC Setup ************************************/
-//    // use RA0:3, RA5, RE0 as analog inputs
-//    TRISAbits.TRISA0 = 1;
-//    TRISAbits.TRISA1 = 1;
-//    TRISAbits.TRISA2 = 1;
-//    TRISAbits.TRISA3 = 1;
-//    TRISAbits.TRISA5 = 1;
-//    TRISEbits.TRISE0 = 1;
-//    TRISE = 255; // all inputs
-//    REPU = 0;   // disable PORT E pull-ups
-//
-//    // configure ADC to use AN0,DONE, and turn on ADC
-//    ADCON0 = 0b00000001;
-//    // configure ctmu "special trigger", Internal VREF 4.1, AVss, AVss
-//    ADCON1 = 0b01000000;
-//
-//    // right justified, 0 TAD, F RC (clock derived from A/D RC oscillator)
-//    ADCON2 = 0b10000111;
-//
-//    // set AN0-5 as an analog inputs
-//    ANSEL0 = 1;
-//    ANSEL1 = 1;
-//    ANSEL2 = 1;
-//    ANSEL3 = 1;
-//    ANSEL4 = 1;
-//    ANSEL5 = 1;
-//    // clear ADC interrupt
-//    ADIF = 0;
-//    ADIP = 0;  //A/D Converter Interrupt Priority Low
-//    // enable ADC interrupt
-//    ADIE = 1;
+    // right justified, 0 TAD, F RC (clock derived from A/D RC oscillator)
+    ADCON2 = 0b10000111;
+
+    // set AN0-5 as an analog inputs
+    ANSEL0 = 1;
+    ANSEL1 = 1;
+    ANSEL2 = 1;
+    ANSEL3 = 1;
+    ANSEL4 = 1;
+    ANSEL5 = 1;
+    // clear ADC interrupt
+    ADIF = 0;
+    ADIP = 0;  //A/D Converter Interrupt Priority Low
+    // enable ADC interrupt
+    ADIE = 1;
   
     /******************** Timer 0 Setup ************************************/
 
@@ -156,10 +170,11 @@ void InitApp(void)
                 BAUDRATEREG2);
     
     
-    /* Enable interrupts */
+    // Enable interrupt priorities
     IPEN = 1;
-
-    PEIE = 1;               // enable peripheral interrupts
+    // enable peripheral interrupts
+    PEIE = 1;
+    // enable global interrupts
     GIE = 1;
 
     // initialize global variables
@@ -167,7 +182,11 @@ void InitApp(void)
     uart1CharacterReceived = 0;
     uart2CharacterReceived = 0;
     updateDisplay = 0;
-    DS1820_FOUND = 0;
+
+    for(i=0; i <DS1820_DEVICE_PINS; i++) {
+      DS1820_FOUND[i] = FALSE;
+    }
+
 }
 
 void doHeartBeat(void) {

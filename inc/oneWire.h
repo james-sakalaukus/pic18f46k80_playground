@@ -12,12 +12,7 @@
 #include <xc.h>
 #include "user.h"
 #include <stdint.h>
-
-/* check configuration of driver */
-#ifndef DS1820_DATAPIN
-#error DS1820 data pin not defined!
-#endif
-
+#include <stdbool.h>        /* For true/false definition */
 
 #define TEMP_RES              0x100 /* temperature resolution => 1/256°C = 0.0039°C */
 
@@ -47,6 +42,7 @@
 #define DS1820_ADDR_LEN       8
 
 
+
 /* -------------------------------------------------------------------------- */
 /*                            DS1820 Commands                                 */
 /* -------------------------------------------------------------------------- */
@@ -71,48 +67,32 @@
 /*                            static variables                                */
 /* -------------------------------------------------------------------------- */
 
-static uint8_t bDoneFlag;
-static uint8_t nLastDiscrepancy_u8;
-static uint8_t nRomAddr_au8[DS1820_ADDR_LEN];
-
-
+static bool bDoneFlag[DS1820_DEVICE_PINS];
+static uint8_t nLastDiscrepancy_u8[DS1820_DEVICE_PINS];
+static uint8_t nRomAddr_au8[DS1820_DEVICE_PINS][DS1820_ADDR_LEN];
 
 /* -------------------------------------------------------------------------- */
 /*                           Low-Level Functions                              */
 /* -------------------------------------------------------------------------- */
 
-#ifdef DS1820_INTERRUPT_LOCK
-#define DS1820_DisableInterrupts()  disable_interrupts(GLOBAL)
-#else
-#define DS1820_DisableInterrupts() GIE = 0;
-#endif
-
-
-#ifdef DS1820_INTERRUPT_LOCK
-#define DS1820_EnableInterrupts()   enable_interrupts(GLOBAL)
-#else
-#define DS1820_EnableInterrupts() GIE = 1;
-#endif
-
-
 // Function Prototypes
-uint8_t DS1820_Reset(void);
-uint8_t DS1820_ReadBit(void);
-void DS1820_WriteBit(uint8_t bBit);
-uint8_t DS1820_ReadByte(void);
-void DS1820_WriteByte(uint8_t val_u8);
+bool DS1820_Reset(uint8_t busNum);
+bool DS1820_ReadBit(uint8_t busNum);
+void DS1820_WriteBit(bool bBit, uint8_t busNum);
+uint8_t DS1820_ReadByte(uint8_t busNum);
+void DS1820_WriteByte(uint8_t val_u8, uint8_t busNum);
 
 /* -------------------------------------------------------------------------- */
 /*                             API Interface                                  */
 /* -------------------------------------------------------------------------- */
 
 
-void DS1820_AddrDevice(uint8_t nAddrMethod);
-uint8_t DS1820_FindNextDevice(void);
-uint8_t DS1820_FindFirstDevice(void);
-void DS1820_WriteEEPROM(uint8_t nTHigh, uint8_t nTLow);
-int16_t DS1820_GetTempRaw(void);
-float DS1820_GetTempFloat(void);
+void DS1820_AddrDevice(uint8_t nAddrMethod, uint8_t busNum);
+bool DS1820_FindNextDevice(uint8_t busNum);
+bool DS1820_FindFirstDevice(uint8_t busNum);
+void DS1820_WriteEEPROM(uint8_t nTHigh, uint8_t nTLow, uint8_t busNum);
+int16_t DS1820_GetTempRaw(uint8_t busNum);
+float DS1820_GetTempFloat(uint8_t busNum);
 void DS1820_GetTempString(int16_t tRaw_s16, char *strTemp_pc);
 
 

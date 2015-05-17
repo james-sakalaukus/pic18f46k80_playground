@@ -3,7 +3,7 @@
 /******************************************************************************/
 #include <xc.h>        /* XC8 General Include File */
 #include <stdint.h>        /* For uint8_t definition */
-#include <stdbool.h>       /* For true/false definition */
+//#include <stdbool.h>       /* For true/false definition */
 #include <stdio.h>
 
 #include <plib.h>
@@ -16,19 +16,22 @@
 #include "user.h"          /* User funct/params, such as InitApp */
 
 
-#include "ds1820.h"
+#include "oneWire.h"
 /******************************************************************************/
 /* User Global Variable Declaration                                           */
 /******************************************************************************/
 char endLine[3] = "\n";
 char openString[] = "Hello from PIC18";
 
-
+static char temperatureSensorAddress[DS1820_DEVICE_PINS][DS1820_ADDR_LEN];
 
 void writeDisplay(void);
-float readTempSensor(void);
+float readTempSensor(uint8_t);
 void readAnalogs(void);
 void clearScreen(void);
+void printTempAddress(void);
+void printTemps(void);
+void Init_Sensors(void);
 
 /******************************************************************************/
 /* Main Program                                                               */
@@ -38,30 +41,25 @@ void main(void)
 {
 
   int i = 0;
+  int j = 0;
 
 
-  /* Configure the oscillator for the device */
+  // Configure the oscillator for the device
   ConfigureOscillator();
 
-  /* Initialize I/O and Peripherals for application */
+  // Initialize I/O and Peripherals for application
   InitApp();
-
-
-  DS1820_DelayMs(1000);
+  DelayMs(10000);
 
   printf("\r\n");
   printf("\r\n");
   printf("Oscillator and Peripherals initialized!\r\n");
 
 
-
-  if(DS1820_FindFirstDevice()) {
-    printf("Found a DS1820 Device!\r\n");
-    DS1820_FOUND = true;
-  }
+  Init_Sensors();
 
   // start a conversion
-//  GODONE = 1;
+  GODONE = 1;
 
   while(1) {
     
@@ -71,12 +69,13 @@ void main(void)
         case 'd':
           writeDisplay();
           break;
-        case 'a':
+        case 'v':
           readAnalogs();
           break;
-
-        default:
-          readTempSensor();
+        case 'a':
+          printTempAddress();
+          break;
+        default: break;
       }
     }
 
@@ -88,13 +87,54 @@ void main(void)
       unhandledIRQ = 0;
     }
     if(updateDisplay){
-//      clearScreen();
-//      readTempSensor();
-      printf("%c%cDS1820_0: F: %2.2f \r\n", 254, 88,readTempSensor());
+//      printTempAddress();
+      printTemps();
       updateDisplay = 0;
     }
   }
 }
+
+void Init_Sensors() {
+  uint8_t i, j;
+  printf("Init_Sensors(): Checking for DS1820 Device on %d bus pins\r\n", DS1820_DEVICE_PINS);
+
+  for(i=0; i< DS1820_DEVICE_PINS; i++) {
+
+    if(DS1820_FindFirstDevice(i)) {
+      DS1820_FOUND[i] = TRUE;
+
+      for(j=0; j< DS1820_ADDR_LEN; j++) {
+        sprintf(&temperatureSensorAddress[i][j], "%X", nRomAddr_au8[i][j]);
+      }
+      printf("Init_Sensors(): Found a DS1820 Device on bus: %d with address: %s\r\n", i, temperatureSensorAddress[i][0]);
+    } else {
+      DS1820_FOUND[i] = FALSE;
+      printf("Init_Sensors(): No DS1820 Device on bus: %d\r\n", i);
+    }
+  }
+}
+
+
+
+void printTemps() {
+  uint8_t i = 0;
+  for(i=0; i< DS1820_DEVICE_PINS; i++) {
+    if(DS1820_FOUND[i]) {
+      printf("%c%cDS1820_%d: F: %2.2f \r\n", 254, 88, i, readTempSensor(i));
+    }
+  }
+}
+void printTempAddress() {
+  uint8_t i = 0;
+//  printf("printTempAddress()\r\n");
+  for(i=0; i< DS1820_DEVICE_PINS; i++) {
+    if(DS1820_FOUND[i]) {
+      printf("DS1820 Device on bus: %d with address: %s\r\n", i, temperatureSensorAddress[i][0]);
+    }
+  }
+}
+
+
 void clearScreen(void) {
   unsigned char clear_screen[] = {254, 88};    //Command bytes to clear screen
   while(Busy1USART());
@@ -140,24 +180,24 @@ void writeDisplay(void) {
   }
 }
 
-float readTempSensor(void) {
+float readTempSensor(uint8_t busNum) {
 
   float temperature_float;
 
-  if(DS1820_FOUND) {
-    temperature_float = DS1820_GetTempFloat();
+  if(DS1820_FOUND[busNum]) {
+    temperature_float = DS1820_GetTempFloat(busNum);
     temperature_float = ((temperature_float * 9)/5)+32;
     return temperature_float;
 
-  } else if(DS1820_FindFirstDevice()) {
-    DS1820_FOUND = 1;
-    temperature_float = DS1820_GetTempFloat();
+  } else if(DS1820_FindFirstDevice(busNum)) {
+    DS1820_FOUND[busNum] = TRUE;
+    temperature_float = DS1820_GetTempFloat(busNum);
     temperature_float = ((temperature_float * 9)/5)+32;
     return temperature_float;
 
   } else {
-    DS1820_FOUND = 0;
-    printf("Could not find first DS1820 device\r\n");
+    DS1820_FOUND[busNum] = FALSE;
+    printf("Could not find first DS1820 device on bus: %d\r\n", busNum);
     return 0;
   }
 }

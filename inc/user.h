@@ -11,6 +11,7 @@
 /******************************************************************************/
 
 #define heartbeat LATDbits.LATD2
+#define DS1820_DEVICE_PINS    4   // number of 1-wire buses
 
 /******************************************************************************/
 /* Global Variables                                                           */
@@ -21,33 +22,23 @@ volatile unsigned char uart2CharacterReceived;
 volatile unsigned char unhandledIRQ;
 volatile unsigned char receivedCharacter;
 volatile unsigned char updateDisplay;
-volatile unsigned char DS1820_FOUND;
+volatile unsigned char DS1820_FOUND[DS1820_DEVICE_PINS];
 
 // 6 16-bit temperature values
 volatile uint8_t temperature[12];
-
-/* --- configure DS1820 temperature sensor pin --- */
-#define DS1820_DATAPIN      PORTCbits.RC5
-#define output_low()     TRISCbits.TRISC5 = 0;(LATCbits.LATC5 = 0)
-#define output_high()    TRISCbits.TRISC5 = 0;(LATCbits.LATC5 = 1)
-//#define DS1820_DATAPIN      PORTAbits.RA0
-//#define output_low()     TRISAbits.TRISA0 = 0;(LATAbits.LATA0 = 0)
-//#define output_high()    TRISAbits.TRISA0 = 0;(LATAbits.LATA0 = 1)
-
-#define input()          input_func()
-bool input_func(void);
 
 
 /******************************************************************************/
 /* User Function Prototypes                                                   */
 /******************************************************************************/
 void putch(char data);
-void InitApp(void);         /* I/O and Peripheral Initialization */
+void InitApp(void);
 void delay();
 void doHeartBeat();
 
-void DS1820_DelayMs(unsigned long dly_ms);
-//void DS1820_DelayUs(unsigned long dly_us);
-#define DS1820_DelayUs(dly_us)       __delay_us(dly_us)
+void DelayMs(unsigned long dly_ms);
+#define DelayUs(dly_us) __delay_us(dly_us)
 
+void output_temp_sensors(uint8_t value, uint8_t busNum);
+uint8_t input_temp_senosrs(int8_t num);
 #endif

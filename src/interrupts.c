@@ -15,7 +15,6 @@
 
 /* High-priority service */
 int adcIndex = 0;
-char pulseLed = 0;
 
 void interrupt high_isr(void) {
 
@@ -36,10 +35,6 @@ void interrupt high_isr(void) {
     TMR0IF = 0;
     if(!heartbeat) {
       WriteTimer0(32768);
-//      pulseLed = 0;
-    } else {
-//      pulseLed = 1;
-      updateDisplay = 1;
     }
 
     doHeartBeat();
@@ -47,6 +42,7 @@ void interrupt high_isr(void) {
 
   } else if(TMR3IF) {
     TMR3IF = 0;
+    updateDisplay = 1;
 
   } else {
     unhandledIRQ = 1;
