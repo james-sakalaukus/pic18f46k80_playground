@@ -32,6 +32,19 @@ void clearScreen(void);
 void printTempAddress(void);
 void printTemps(void);
 void Init_Sensors(void);
+void readTempAll(void);
+
+
+/******************************************************************************
+* 20x4 LCD
+*
+* |xx.y xx.y xx.y xx.y |
+* |Hold Temp: xx.y     |
+* |Heater Status: OFF  |
+* |Max: xx.y  Min: xx.y|
+*
+******************************************************************************/
+
 
 /******************************************************************************/
 /* Main Program                                                               */
@@ -88,33 +101,47 @@ void main(void)
     }
     if(updateDisplay){
 //      printTempAddress();
-      printTemps();
+      readTempAll();
       updateDisplay = 0;
     }
   }
 }
 
 void Init_Sensors() {
-  uint8_t i, j;
-  printf("Init_Sensors(): Checking for DS1820 Device on %d bus pins\r\n", DS1820_DEVICE_PINS);
+  uint8_t i, sensorCount;
+  sensorCount = 0;
+  printf("%c%cInit_Sensors(): Checking for DS1820 Device on %d bus pins\r\n", 254, 88, DS1820_DEVICE_PINS);
 
   for(i=0; i< DS1820_DEVICE_PINS; i++) {
-
-    if(DS1820_FindFirstDevice(i)) {
-      DS1820_FOUND[i] = TRUE;
-
-      for(j=0; j< DS1820_ADDR_LEN; j++) {
-        sprintf(&temperatureSensorAddress[i][j], "%X", nRomAddr_au8[i][j]);
-      }
-      printf("Init_Sensors(): Found a DS1820 Device on bus: %d with address: %s\r\n", i, temperatureSensorAddress[i][0]);
+    if ( DS1820_FindFirstDevice(i) ) {
+      do {
+        printf("Sensor_%d_%d: \r\n", i, sensorCount);
+        sensorCount ++;
+      } while ( DS1820_FindNextDevice(i) );
+      sensorCount = 0;
     } else {
-      DS1820_FOUND[i] = FALSE;
-      printf("Init_Sensors(): No DS1820 Device on bus: %d\r\n", i);
+      printf("No Sensors on Bus %d\r\n", i);
     }
-  }
+  } // for()
 }
 
-
+void readTempAll() {
+  uint8_t sensorCount = 0;
+  uint8_t i = 0;
+  float temperature;
+  printf("%c%c\r\n", 254, 88);
+  for(i=0; i< DS1820_DEVICE_PINS; i++) {
+    if ( DS1820_FindFirstDevice(i) ) {
+      do {
+        temperature = DS1820_GetTempFloat(i);
+        temperature = ((temperature * 9)/5)+32;
+        printf("%c%cSensor_%d_%d: F: %2.2f \r\n", 254, 88, i, sensorCount, temperature);
+        sensorCount ++;
+      } while ( DS1820_FindNextDevice(i) );
+      sensorCount = 0;
+    } // findFirstDevice()
+  } // for()
+}
 
 void printTemps() {
   uint8_t i = 0;
@@ -211,3 +238,4 @@ void readAnalogs(void) {
     printf("ADC %d is: %u\r\n", i, sensorValue);
   }
 }
+

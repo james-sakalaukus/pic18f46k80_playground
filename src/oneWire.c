@@ -197,7 +197,7 @@ bool DS1820_FindNextDevice(uint8_t busNum)
   // no device found, reset the search
   if (bStatus || bDoneFlag[busNum]) {
     nLastDiscrepancy_u8[busNum] = 0;
-    printf("DS1820_FindNextDevice(): bus number: %d; no device found!\r\n", busNum);
+//    printf("DS1820_FindNextDevice(): bus number: %d; no device found!\r\n", busNum);
     return FALSE;
   }
 
@@ -299,7 +299,7 @@ bool DS1820_FindNextDevice(uint8_t busNum)
       for(int i=0; i< DS1820_ADDR_LEN; i++) {
         sprintf(&address[i], "%X", nRomAddr_au8[busNum][i]);
       }
-      printf("DS1820_FindNextDevice(): Search successful bus: %d, address is: %s\r\n", busNum, address);
+//      printf("DS1820_FindNextDevice(): Search successful bus: %d, address is: %s\r\n", busNum, address);
     } else {
       printf("DS1820_FindNextDevice(): Search NOT successful bus: %d, addres was 0's\r\n", busNum);
     }
