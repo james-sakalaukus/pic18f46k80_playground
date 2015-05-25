@@ -13,7 +13,8 @@
 #define _XTAL_FREQ FOSC
 
 #define BAUDRATE1    115200L
-#define BAUDRATE2    57600L
+//#define BAUDRATE2    57600L
+#define BAUDRATE2    115200L
 #define USE_HI_SPEED_BRG            //Use BRGH=1, UART high speed mode
 
 //UART Baud Rate Calculation *******************************************************

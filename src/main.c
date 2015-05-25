@@ -23,16 +23,15 @@
 char endLine[3] = "\n";
 char openString[] = "Hello from PIC18";
 
-static char temperatureSensorAddress[DS1820_DEVICE_PINS][DS1820_ADDR_LEN];
+static float currentTemps[DS1820_DEVICES];
 
 void writeDisplay(void);
-float readTempSensor(uint8_t);
 void readAnalogs(void);
 void clearScreen(void);
-void printTempAddress(void);
-void printTemps(void);
 void Init_Sensors(void);
 void readTempAll(void);
+
+uint8_t tempSensorAddress[DS1820_DEVICES][DS1820_ADDR_LEN];
 
 
 /******************************************************************************
@@ -62,7 +61,7 @@ void main(void)
 
   // Initialize I/O and Peripherals for application
   InitApp();
-  DelayMs(10000);
+//  DelayMs(10000);
 
   printf("\r\n");
   printf("\r\n");
@@ -76,21 +75,21 @@ void main(void)
 
   while(1) {
     
-    if(uart2CharacterReceived) {
-      uart2CharacterReceived = 0;
-      switch (receivedCharacter) {
-        case 'd':
-          writeDisplay();
-          break;
-        case 'v':
-          readAnalogs();
-          break;
-        case 'a':
-          printTempAddress();
-          break;
-        default: break;
-      }
-    }
+//    if(uart2CharacterReceived) {
+//      uart2CharacterReceived = 0;
+//      switch (receivedCharacter) {
+//        case 'd':
+//          writeDisplay();
+//          break;
+//        case 'v':
+//          readAnalogs();
+//          break;
+//        case 'a':
+////          printTempAddress();
+//          break;
+//        default: break;
+//      }
+//    }
 
     if(unhandledIRQ == 1) {
       printf("A high priority IRQ was ignored\n");
@@ -99,68 +98,64 @@ void main(void)
       printf("A low priority IRQ was ignored\n");
       unhandledIRQ = 0;
     }
+
     if(updateDisplay){
-//      printTempAddress();
       readTempAll();
+      printf("%c%c", 254, 88);
+      for(i=0; i<DS1820_DEVICES;i++) {
+        printf("%2.1f ", currentTemps[i]);
+      }
       updateDisplay = 0;
     }
   }
 }
 
 void Init_Sensors() {
-  uint8_t i, sensorCount;
-  sensorCount = 0;
-  printf("%c%cInit_Sensors(): Checking for DS1820 Device on %d bus pins\r\n", 254, 88, DS1820_DEVICE_PINS);
+  uint8_t sensorCount;
 
-  for(i=0; i< DS1820_DEVICE_PINS; i++) {
-    if ( DS1820_FindFirstDevice(i) ) {
-      do {
-        printf("Sensor_%d_%d: \r\n", i, sensorCount);
-        sensorCount ++;
-      } while ( DS1820_FindNextDevice(i) );
-      sensorCount = 0;
-    } else {
-      printf("No Sensors on Bus %d\r\n", i);
-    }
-  } // for()
+
+  sensorCount = 0;
+
+  printf("%c%cInit_Sensors(): Checking for DS1820 Devices\r\n", 254, 88);
+
+  if ( DS1820_FindFirstDevice(tempSensorAddress[sensorCount]) ) {
+    char address[DS1820_ADDR_LEN+10];
+    do {
+      printf("Found Sensor %d: \r\n", sensorCount);
+      for(int i=0; i< DS1820_ADDR_LEN; i++) {
+        sprintf(&address[i], "%X", tempSensorAddress[sensorCount][i]);
+      }
+      printf("Search successful address is: %s\r\n", address);
+      sensorCount ++;
+      if(sensorCount > DS1820_DEVICES) {
+        break;
+      }
+    } while ( DS1820_FindNextDevice(tempSensorAddress[sensorCount]) );
+    sensorCount = 0;
+  }
 }
+
+//void readTempAll() {
+//  uint8_t sensorCount = 0;
+//  uint8_t i = 0;
+//  if ( DS1820_FindFirstDevice() ) {
+//    do {
+//      currentTemps[sensorCount] = DS1820_GetTempFloat();
+//      currentTemps[sensorCount] = ((currentTemps[sensorCount] * 9)/5)+32;
+//      sensorCount ++;
+//    } while ( DS1820_FindNextDevice() );
+//    sensorCount = 0;
+//  } // findFirstDevice()
+//}
 
 void readTempAll() {
   uint8_t sensorCount = 0;
   uint8_t i = 0;
-  float temperature;
-  printf("%c%c\r\n", 254, 88);
-  for(i=0; i< DS1820_DEVICE_PINS; i++) {
-    if ( DS1820_FindFirstDevice(i) ) {
-      do {
-        temperature = DS1820_GetTempFloat(i);
-        temperature = ((temperature * 9)/5)+32;
-        printf("%c%cSensor_%d_%d: F: %2.2f \r\n", 254, 88, i, sensorCount, temperature);
-        sensorCount ++;
-      } while ( DS1820_FindNextDevice(i) );
-      sensorCount = 0;
-    } // findFirstDevice()
-  } // for()
-}
-
-void printTemps() {
-  uint8_t i = 0;
-  for(i=0; i< DS1820_DEVICE_PINS; i++) {
-    if(DS1820_FOUND[i]) {
-      printf("%c%cDS1820_%d: F: %2.2f \r\n", 254, 88, i, readTempSensor(i));
-    }
+  for(i=0;i<DS1820_DEVICES;i++) {
+    currentTemps[i] = DS1820_GetTempFloat(tempSensorAddress[i]);
+    currentTemps[i] = ((currentTemps[i] * 9)/5)+32;
   }
 }
-void printTempAddress() {
-  uint8_t i = 0;
-//  printf("printTempAddress()\r\n");
-  for(i=0; i< DS1820_DEVICE_PINS; i++) {
-    if(DS1820_FOUND[i]) {
-      printf("DS1820 Device on bus: %d with address: %s\r\n", i, temperatureSensorAddress[i][0]);
-    }
-  }
-}
-
 
 void clearScreen(void) {
   unsigned char clear_screen[] = {254, 88};    //Command bytes to clear screen
@@ -204,28 +199,6 @@ void writeDisplay(void) {
     Write1USART(message[i]);
     while(Busy2USART());
     Write2USART(message[i]);
-  }
-}
-
-float readTempSensor(uint8_t busNum) {
-
-  float temperature_float;
-
-  if(DS1820_FOUND[busNum]) {
-    temperature_float = DS1820_GetTempFloat(busNum);
-    temperature_float = ((temperature_float * 9)/5)+32;
-    return temperature_float;
-
-  } else if(DS1820_FindFirstDevice(busNum)) {
-    DS1820_FOUND[busNum] = TRUE;
-    temperature_float = DS1820_GetTempFloat(busNum);
-    temperature_float = ((temperature_float * 9)/5)+32;
-    return temperature_float;
-
-  } else {
-    DS1820_FOUND[busNum] = FALSE;
-    printf("Could not find first DS1820 device on bus: %d\r\n", busNum);
-    return 0;
   }
 }
 

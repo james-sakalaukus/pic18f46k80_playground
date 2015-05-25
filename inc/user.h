@@ -11,7 +11,7 @@
 /******************************************************************************/
 
 #define heartbeat LATDbits.LATD2
-#define DS1820_DEVICE_PINS    4   // number of 1-wire buses
+#define DS1820_DEVICES    4     // number of 1-wire buses
 
 /******************************************************************************/
 /* Global Variables                                                           */
@@ -22,7 +22,7 @@ volatile unsigned char uart2CharacterReceived;
 volatile unsigned char unhandledIRQ;
 volatile unsigned char receivedCharacter;
 volatile unsigned char updateDisplay;
-volatile unsigned char DS1820_FOUND[DS1820_DEVICE_PINS];
+
 
 // 6 16-bit temperature values
 volatile uint8_t temperature[12];
@@ -39,6 +39,6 @@ void doHeartBeat();
 void DelayMs(unsigned long dly_ms);
 #define DelayUs(dly_us) __delay_us(dly_us)
 
-void output_temp_sensors(uint8_t value, uint8_t busNum);
-uint8_t input_temp_senosrs(int8_t num);
+void output_temp_sensors(uint8_t value);
+uint8_t input_temp_senosrs();
 #endif

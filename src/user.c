@@ -28,45 +28,14 @@ void DelayMs(unsigned long dly_ms) {
 // TODO: Why did RD2, RD3 not work for 1-wire sensors???
 // I think the heart beat LED was pulling too much current from PORTD - this port has lower limits than PORT A, B, C
 
-void output_temp_sensors(uint8_t value, uint8_t busNum) {
-  switch(busNum) {
-    case 0:
-      TRISCbits.TRISC2 = 0;
-      LATCbits.LATC2 = value;
-      break;
-    case 1:
-      TRISCbits.TRISC3 = 0;
-      LATCbits.LATC3 = value;
-      break;
-    case 2:
-      TRISCbits.TRISC4 = 0;
-      LATCbits.LATC4 = value;
-      break;
-    case 3:
-      TRISCbits.TRISC5 = 0;
-      LATCbits.LATC5 = value;
-      break;
-    default: break;
-  }
+void output_temp_sensors(uint8_t value) {
+  TRISCbits.TRISC3 = 0;
+  LATCbits.LATC3 = value;
 }
 
-uint8_t input_temp_senosrs(int8_t busNum) {
-  switch(busNum) {
-    case 0:
-      TRISCbits.TRISC2 = 1;
-      return PORTCbits.RC2;
-    case 1:
-      TRISCbits.TRISC3 = 1;
-      return PORTCbits.RC3;
-    case 2:
-      TRISCbits.TRISC4 = 1;
-      return PORTCbits.RC4;
-    case 3:
-      TRISCbits.TRISC5 = 1;
-      return PORTCbits.RC5;
-    default:
-      return -1;
-  }
+uint8_t input_temp_senosrs() {
+  TRISCbits.TRISC3 = 1;
+  return PORTCbits.RC3;
 }
 
 
@@ -182,11 +151,6 @@ void InitApp(void)
     uart1CharacterReceived = 0;
     uart2CharacterReceived = 0;
     updateDisplay = 0;
-
-    for(i=0; i <DS1820_DEVICE_PINS; i++) {
-      DS1820_FOUND[i] = FALSE;
-    }
-
 }
 
 void doHeartBeat(void) {

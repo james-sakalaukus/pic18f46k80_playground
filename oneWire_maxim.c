@@ -7,6 +7,7 @@
 
 #include <user.h>
 #include <pic18f46k80.h>
+#include <oneWire_maxim.h>
 
 #define PORT_WRITE LATBbits.LATB7
 #define PORT_TRIS TRISBbits.TRISB7
@@ -35,11 +36,7 @@ int inp(unsigned port){
   return PORT_READ;
 }
 
-// Pause for exactly 'tick' number of ticks = 0.25us
-void tickDelay(int tick); // Implementation is platform specific
 
-// 'tick' values
-int A,B,C,D,E,F,G,H,I,J;
 
 //-----------------------------------------------------------------------------
 // Set the 1-Wire timing to 'standard' (standard=1) or 'overdrive' (standard=0).
@@ -283,36 +280,6 @@ int ReadPageMAC(int page, unsigned char *page_data, unsigned char *mac)
 }
 
 
-
-// TMEX API TEST BUILD DECLARATIONS
-#define TMEXUTIL
-#include "ibtmexcw.h"
-long session_handle;
-// END TMEX API TEST BUILD DECLARATIONS
-
-// definitions
-#define FALSE 0
-#define TRUE  1
-
-// method declarations
-int  OWFirst();
-int  OWNext();
-int  OWVerify();
-void OWTargetSetup(unsigned char family_code);
-void OWFamilySkipSetup();
-int  OWReset();
-void OWWriteByte(unsigned char byte_value);
-void OWWriteBit(unsigned char bit_value);
-unsigned char OWReadBit();
-int  OWSearch();
-unsigned char docrc8(unsigned char value);
-
-// global search state
-unsigned char ROM_NO[8];
-int LastDiscrepancy;
-int LastFamilyDiscrepancy;
-int LastDeviceFlag;
-unsigned char crc8;
 
 //--------------------------------------------------------------------------
 // Find the 'first' devices on the 1-Wire bus
@@ -638,23 +605,6 @@ int main(short argc, char **argv)
    short PortType=5,PortNum=1;
    int rslt,i,cnt;
 
-   // TMEX API SETUP
-   // get a session
-   session_handle = TMExtendedStartSession(PortNum,PortType,NULL);
-   if (session_handle <= 0)
-   {
-      printf("No session, %d\n",session_handle);
-      exit(0);
-   }
-
-   // setup the port
-   rslt = TMSetup(session_handle);
-   if (rslt != 1)
-   {
-      printf("Fail setup, %d\n",rslt);
-      exit(0);
-   }
-   // END TMEX API SETUP
 
    // find ALL devices
    printf("\nFIND ALL\n");
