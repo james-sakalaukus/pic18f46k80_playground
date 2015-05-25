@@ -5,43 +5,26 @@
  *      Author: james
  */
 
-#include <user.h>
+#include "user.h"
+#include "system.h"
 #include <pic18f46k80.h>
 #include <oneWire_maxim.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-#define PORT_WRITE LATBbits.LATB7
-#define PORT_TRIS
-#define PORT_READ
-
-
-// send 'databyte' to 'port'
-void outp(unsigned port, uint8_t databyte) {
-  TRISBbits.TRISB7 = 0;
-  PORT_WRITE = databyte;
-}
-
-// read byte from 'port'
-uint8_t inp(unsigned port) {
-  TRISBbits.TRISB7 = 1;
-  return PORTBbits.PORTB7;
-}
 
 
 //-----------------------------------------------------------------------------
-// Generate a 1-Wire reset, return 1 if no presence detect was found,
-// return 0 otherwise.
+// Generate a 1-Wire reset, return 0 if no presence detect was found,
+// return 1 otherwise.
 uint8_t OWReset(void) {
   uint8_t result;
-
-  tickDelay(DELAY_G);
-  outp(0x00); // Drives DQ low
-  tickDelay(DELAY_H);
-  outp(0x01); // Releases the bus
-  tickDelay(DELAY_I);
-  result = inp() ^ 0x01; // Sample for presence pulse from slave
-  tickDelay(DELAY_J); // Complete the reset sequence recovery
+  output_temp_sensors(0x00); // Drives DQ low
+  DelayUs(DELAY_H);
+  output_temp_sensors(0x01); // Releases the bus
+  DelayUs(DELAY_I);
+  result = input_temp_sensors(); // Sample for presence pulse from slave
+  DelayUs(DELAY_J); // Complete the reset sequence recovery
   return result; // Return sample presence pulse result
 }
 
@@ -51,16 +34,16 @@ uint8_t OWReset(void) {
 void OWWriteBit(uint8_t bit) {
   if (bit) {
     // Write '1' bit
-    outp(0x00); // Drives DQ low
-    tickDelay(DELAY_A);
-    outp(0x01); // Releases the bus
-    tickDelay(DELAY_B); // Complete the time slot and 10us recovery
+    output_temp_sensors(0x00); // Drives DQ low
+    DelayUs(DELAY_A);
+    output_temp_sensors(0x01); // Releases the bus
+    DelayUs(DELAY_B); // Complete the time slot and 10us recovery
   } else {
     // Write '0' bit
-    outp(0x00); // Drives DQ low
-    tickDelay(DELAY_C);
-    outp(0x01); // Releases the bus
-    tickDelay(DELAY_D);
+    output_temp_sensors(0x00); // Drives DQ low
+    DelayUs(DELAY_C);
+    output_temp_sensors(0x01); // Releases the bus
+    DelayUs(DELAY_D);
   }
 }
 
@@ -70,12 +53,12 @@ void OWWriteBit(uint8_t bit) {
 uint8_t OWReadBit(void) {
   uint8_t result;
 
-  outp(0x00); // Drives DQ low
-  tickDelay(DELAY_A);
-  outp(0x01); // Releases the bus
-  tickDelay(DELAY_E);
-  result = inp() & 0x01; // Sample the bit value from the slave
-  tickDelay(DELAY_F); // Complete the time slot and 10us recovery
+  output_temp_sensors(0x00); // Drives DQ low
+  DelayUs(DELAY_A);
+  output_temp_sensors(0x01); // Releases the bus
+  DelayUs(DELAY_E);
+  result = input_temp_sensors(); // Sample the bit value from the slave
+  DelayUs(DELAY_F); // Complete the time slot and 10us recovery
 
   return result;
 }
@@ -160,7 +143,7 @@ uint8_t OWSearch() {
   // if the last call was not the last one
   if (!LastDeviceFlag) {
     // 1-Wire reset
-    if (!OWReset()) {
+    if (OWReset()) {
       // reset the search
       LastDiscrepancy = 0;
       LastDeviceFlag = FALSE;
@@ -308,26 +291,4 @@ uint8_t docrc8(uint8_t value) {
   return crc8;
 }
 
-//--------------------------------------------------------------------------
-// TEST BUILD MAIN
-//
-int main(short argc, char **argv) {
 
-  uint8_t returnValue = 0;
-  uint8_t i = 0;
-  uint8_t sensorCount = 0;
-
-  // find ALL devices
-  printf("\nFIND ALL\n");
-  returnValue = OWFirst();
-  while (returnValue) {
-
-    // print device found
-    for (i = 7; i >= 0; i--) {
-      printf("%02X", ROM_NO[i]);
-    }
-
-    printf("  %d\n", ++sensorCount);
-    returnValue = OWNext();
-  }
-}

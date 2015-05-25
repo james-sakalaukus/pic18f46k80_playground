@@ -10,15 +10,15 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-
+#include "user.h"
 
 // method declarations
 uint8_t OWFirst();
 uint8_t OWNext();
 uint8_t OWVerify();
 uint8_t OWReset();
-void OWWriteByte(uint8_t byte_value);
-void OWWriteBit(uint8_t bit_value);
+void OWWriteByte(uint8_t byte);
+void OWWriteBit(uint8_t bit);
 uint8_t OWReadBit();
 uint8_t OWSearch();
 uint8_t docrc8(uint8_t value);
@@ -30,23 +30,17 @@ uint8_t LastFamilyDiscrepancy;
 uint8_t LastDeviceFlag;
 uint8_t crc8;
 
-// Pause for exactly 'tick' number of ticks = 0.25us
-void tickDelay(uint16_t tick); // Implementation is platform specific
 
-// 'tick' values
-uint16_t A,B,C,D,E,F,G,H,I,J;
-
-// Standard Speed
-const uint16_t DELAY_A = 6 * 4;
-const uint16_t DELAY_B = 64 * 4;
-const uint16_t DELAY_C = 60 * 4;
-const uint16_t DELAY_D = 10 * 4;
-const uint16_t DELAY_E = 9 * 4;
-const uint16_t DELAY_F = 55 * 4;
-const uint16_t DELAY_G = 0;
-const uint16_t DELAY_H = 480 * 4;
-const uint16_t DELAY_I = 70 * 4;
-const uint16_t DELAY_J = 410 * 4;
+// Standard Speed - uS delay values
+const uint16_t DELAY_A = 6;
+const uint16_t DELAY_B = 64;
+const uint16_t DELAY_C = 60;
+const uint16_t DELAY_D = 10;
+const uint16_t DELAY_E = 9;
+const uint16_t DELAY_F = 55;
+const uint16_t DELAY_H = 480;
+const uint16_t DELAY_I = 70;
+const uint16_t DELAY_J = 410;
 
 // TEST BUILD
 static uint8_t dscrc_table[] = {

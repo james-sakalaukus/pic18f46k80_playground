@@ -16,7 +16,8 @@
 #include "user.h"          /* User funct/params, such as InitApp */
 
 
-#include "oneWire.h"
+//#include "oneWire.h"
+#include <oneWire_maxim.h>
 /******************************************************************************/
 /* User Global Variable Declaration                                           */
 /******************************************************************************/
@@ -31,7 +32,7 @@ void clearScreen(void);
 void Init_Sensors(void);
 void readTempAll(void);
 
-uint8_t tempSensorAddress[DS1820_DEVICES][DS1820_ADDR_LEN];
+//uint8_t tempSensorAddress[DS1820_DEVICES][DS1820_ADDR_LEN];
 
 
 /******************************************************************************
@@ -100,40 +101,62 @@ void main(void)
     }
 
     if(updateDisplay){
-      readTempAll();
-      printf("%c%c", 254, 88);
-      for(i=0; i<DS1820_DEVICES;i++) {
-        printf("%2.1f ", currentTemps[i]);
-      }
+//      readTempAll();
+//      printf("%c%c", 254, 88);
+//      for(i=0; i<DS1820_DEVICES;i++) {
+//        printf("%2.1f ", currentTemps[i]);
+//      }
       updateDisplay = 0;
     }
   }
 }
 
-void Init_Sensors() {
-  uint8_t sensorCount;
+//--------------------------------------------------------------------------
+// TEST BUILD MAIN
+//
+void Init_Sensors(void) {
 
+  uint8_t returnValue = 0;
+  int8_t i = 0;
+  uint8_t sensorCount = 0;
 
-  sensorCount = 0;
-
+  // find ALL devices
   printf("%c%cInit_Sensors(): Checking for DS1820 Devices\r\n", 254, 88);
+  returnValue = OWFirst();
+  while (returnValue) {
 
-  if ( DS1820_FindFirstDevice(tempSensorAddress[sensorCount]) ) {
-    char address[DS1820_ADDR_LEN+10];
-    do {
-      printf("Found Sensor %d: \r\n", sensorCount);
-      for(int i=0; i< DS1820_ADDR_LEN; i++) {
-        sprintf(&address[i], "%X", tempSensorAddress[sensorCount][i]);
-      }
-      printf("Search successful address is: %s\r\n", address);
-      sensorCount ++;
-      if(sensorCount > DS1820_DEVICES) {
-        break;
-      }
-    } while ( DS1820_FindNextDevice(tempSensorAddress[sensorCount]) );
-    sensorCount = 0;
+    // print device found
+    for (i = 7; i >= 0; i--) {
+      printf("%02X", ROM_NO[i]);
+    }
+
+    printf("  %d\n", ++sensorCount);
+    returnValue = OWNext();
   }
 }
+
+//void Init_Sensors_Old() {
+//  uint8_t sensorCount;
+//  sensorCount = 0;
+//
+//  printf("%c%cInit_Sensors(): Checking for DS1820 Devices\r\n", 254, 88);
+//
+//  if ( DS1820_FindFirstDevice(tempSensorAddress[sensorCount]) ) {
+//    char address[DS1820_ADDR_LEN+10];
+//    do {
+//      printf("Found Sensor %d: \r\n", sensorCount);
+//      for(int i=0; i< DS1820_ADDR_LEN; i++) {
+//        sprintf(&address[i], "%X", tempSensorAddress[sensorCount][i]);
+//      }
+//      printf("Search successful address is: %s\r\n", address);
+//      sensorCount ++;
+//      if(sensorCount > DS1820_DEVICES) {
+//        break;
+//      }
+//    } while ( DS1820_FindNextDevice(tempSensorAddress[sensorCount]) );
+//    sensorCount = 0;
+//  }
+//}
 
 //void readTempAll() {
 //  uint8_t sensorCount = 0;
@@ -148,14 +171,14 @@ void Init_Sensors() {
 //  } // findFirstDevice()
 //}
 
-void readTempAll() {
-  uint8_t sensorCount = 0;
-  uint8_t i = 0;
-  for(i=0;i<DS1820_DEVICES;i++) {
-    currentTemps[i] = DS1820_GetTempFloat(tempSensorAddress[i]);
-    currentTemps[i] = ((currentTemps[i] * 9)/5)+32;
-  }
-}
+//void readTempAll() {
+//  uint8_t sensorCount = 0;
+//  uint8_t i = 0;
+//  for(i=0;i<DS1820_DEVICES;i++) {
+//    currentTemps[i] = DS1820_GetTempFloat(tempSensorAddress[i]);
+//    currentTemps[i] = ((currentTemps[i] * 9)/5)+32;
+//  }
+//}
 
 void clearScreen(void) {
   unsigned char clear_screen[] = {254, 88};    //Command bytes to clear screen

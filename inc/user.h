@@ -40,5 +40,5 @@ void DelayMs(unsigned long dly_ms);
 #define DelayUs(dly_us) __delay_us(dly_us)
 
 void output_temp_sensors(uint8_t value);
-uint8_t input_temp_senosrs();
+uint8_t input_temp_sensors();
 #endif

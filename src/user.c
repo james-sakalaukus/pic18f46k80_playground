@@ -25,15 +25,12 @@ void DelayMs(unsigned long dly_ms) {
   } while(--dly_ms);
 }
 
-// TODO: Why did RD2, RD3 not work for 1-wire sensors???
-// I think the heart beat LED was pulling too much current from PORTD - this port has lower limits than PORT A, B, C
-
 void output_temp_sensors(uint8_t value) {
   TRISCbits.TRISC3 = 0;
   LATCbits.LATC3 = value;
 }
 
-uint8_t input_temp_senosrs() {
+uint8_t input_temp_sensors() {
   TRISCbits.TRISC3 = 1;
   return PORTCbits.RC3;
 }
