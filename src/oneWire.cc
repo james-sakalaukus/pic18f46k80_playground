@@ -8,9 +8,10 @@
 #include <xc.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "user.h"
 #include "oneWire.h"
-#include <stdbool.h>        /* For true/false definition */
+
 
 
 

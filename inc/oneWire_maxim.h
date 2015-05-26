@@ -8,6 +8,7 @@
 #ifndef ONEWIRE_MAXIM_H_
 #define ONEWIRE_MAXIM_H_
 
+#include <xc.h>             /* XC8 General Include File */
 #include <stdint.h>
 #include <stdbool.h>
 #include "user.h"
@@ -17,11 +18,16 @@ uint8_t OWFirst();
 uint8_t OWNext();
 uint8_t OWVerify();
 uint8_t OWReset();
-void OWWriteByte(uint8_t byte);
-void OWWriteBit(uint8_t bit);
+void OWWriteByte(uint8_t data);
+void OWWriteBit(uint8_t value);
 uint8_t OWReadBit();
+uint8_t OWReadByte();
 uint8_t OWSearch();
 uint8_t docrc8(uint8_t value);
+
+// DS1820 Specific
+float ReadTemp(uint8_t *address);
+void startTempConversion();
 
 // global search state
 uint8_t ROM_NO[8];
@@ -32,15 +38,15 @@ uint8_t crc8;
 
 
 // Standard Speed - uS delay values
-const uint16_t DELAY_A = 6;
-const uint16_t DELAY_B = 64;
-const uint16_t DELAY_C = 60;
-const uint16_t DELAY_D = 10;
-const uint16_t DELAY_E = 9;
-const uint16_t DELAY_F = 55;
-const uint16_t DELAY_H = 480;
-const uint16_t DELAY_I = 70;
-const uint16_t DELAY_J = 410;
+#define DELAY_A 6
+#define DELAY_B 64
+#define DELAY_C 60
+#define DELAY_D 10
+#define DELAY_E 9
+#define DELAY_F 55
+#define DELAY_H 480
+#define DELAY_I 70
+#define DELAY_J 410
 
 // TEST BUILD
 static uint8_t dscrc_table[] = {
