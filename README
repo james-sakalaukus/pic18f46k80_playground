@@ -1,8 +1,12 @@
+Project is a temperature controller with a PIC18f46k80 and DS18B20 1-wire 
+temperature sensors.  A pin controls a relay to switch on a heater.
+
 References:
 
   Maxim 1-Wire:
     http://www.maximintegrated.com/en/app-notes/index.mvp/id/126
     http://www.maximintegrated.com/en/app-notes/index.mvp/id/187
+    
   PIC18 DS18B20 1-Wire Temperature Sensor
     http://www.picprojects.net/ds1820/
   

@@ -1,5 +1,9 @@
-TODO: Change printf() behaviour so that computer UART works independently.
-TODO: Add command line interface for computer
+Change printf() behaviour so that computer UART works independently.
+Add command line interface for computer
 	Ability to set the "hold" temperature
 	
-TODO: Test the wireless UART module for remote interface
+Test the wireless UART module for remote interface
+
+Change the hearbeat LED pin to a higher current port
+
+Add an LED to show heater status
