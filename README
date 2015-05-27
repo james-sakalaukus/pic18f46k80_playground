@@ -1,5 +1,10 @@
-Pickit 2 Ubuntu/Debian:	
-	http://www.microchip.com/forums/m795386.aspx
-	
-Maxim 1-Wire:
-  http://www.maximintegrated.com/en/app-notes/index.mvp/id/126
+References:
+
+  Maxim 1-Wire:
+    http://www.maximintegrated.com/en/app-notes/index.mvp/id/126
+    http://www.maximintegrated.com/en/app-notes/index.mvp/id/187
+  PIC18 DS18B20 1-Wire Temperature Sensor
+    http://www.picprojects.net/ds1820/
+  
+  Pickit 2 Ubuntu/Debian: 
+    http://www.microchip.com/forums/m795386.aspx

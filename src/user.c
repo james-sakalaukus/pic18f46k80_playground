@@ -57,38 +57,9 @@ void InitApp(void)
     // Initialize heartbeat led as output
     TRISDbits.TRISD2 = 0;
 
-    /******************** ADC Setup ************************************/
-    // use RA0:3, RA5, RE0 as analog inputs
-    TRISAbits.TRISA0 = 1;
-    TRISAbits.TRISA1 = 1;
-    TRISAbits.TRISA2 = 1;
-    TRISAbits.TRISA3 = 1;
-    TRISAbits.TRISA5 = 1;
-    TRISEbits.TRISE0 = 1;
-    TRISE = 255; // all inputs
-    REPU = 0;   // disable PORT E pull-ups
+    // Initialize heater relay as output
+    TRISCbits.TRISC4 = 0;
 
-    // configure ADC to use AN0,DONE, and turn on ADC
-    ADCON0 = 0b00000001;
-    // configure ctmu "special trigger", Internal VREF 4.1, AVss, AVss
-    ADCON1 = 0b01000000;
-
-    // right justified, 0 TAD, F RC (clock derived from A/D RC oscillator)
-    ADCON2 = 0b10000111;
-
-    // set AN0-5 as an analog inputs
-    ANSEL0 = 1;
-    ANSEL1 = 1;
-    ANSEL2 = 1;
-    ANSEL3 = 1;
-    ANSEL4 = 1;
-    ANSEL5 = 1;
-    // clear ADC interrupt
-    ADIF = 0;
-    ADIP = 0;  //A/D Converter Interrupt Priority Low
-    // enable ADC interrupt
-    ADIE = 1;
-  
     /******************** Timer 0 Setup ************************************/
 
     WriteTimer0(0); //clear timer if previously contains any value

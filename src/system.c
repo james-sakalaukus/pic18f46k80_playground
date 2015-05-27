@@ -24,10 +24,11 @@ void ConfigureOscillator(void)
     while(!HFIOFS);
 #endif
     // LF clock comes from HF clock
-    // PLL enable to 64MHz
     // Tune RC Oscillator to calibrated frequency
+    // PLL enable to 64MHz
     OSCTUNE = 0b11000000;
-
+    // NO PLL
+//    OSCTUNE = 0b10000000;
 #ifndef __DEBUG
     while(!HFIOFS);
 #endif

@@ -8,12 +8,11 @@
 #define SYS_FREQ        64000000L
 #define FCY             SYS_FREQ/4
 
-#define FOSC (64000000L)
+#define FOSC (SYS_FREQ)
 #define FCYC (FOSC/4L)
 #define _XTAL_FREQ FOSC
 
 #define BAUDRATE1    115200L
-//#define BAUDRATE2    57600L
 #define BAUDRATE2    115200L
 #define USE_HI_SPEED_BRG            //Use BRGH=1, UART high speed mode
 

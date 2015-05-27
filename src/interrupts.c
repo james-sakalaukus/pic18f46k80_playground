@@ -42,8 +42,9 @@ void interrupt high_isr(void) {
 
   } else if(TMR3IF) {
     TMR3IF = 0;
-    updateDisplay = 1;
-
+    if(updateDisplay != 20) {
+      updateDisplay++;
+    }
   } else {
     unhandledIRQ = 1;
   }
@@ -52,26 +53,5 @@ void interrupt high_isr(void) {
 /* Low-priority interrupt routine */
 void low_priority interrupt low_isr(void)
 {
-  if(ADIF) {
-    
-    // Clear ADC Interrupt Flag            
-    ADIF = 0;     
-    
-//    char index;
-//    index = adcIndex*2;
-//
-//    temperature[index] = ADRESH;
-//    temperature[index+1] = ADRESL;
-//    if(adcIndex==5) {
-//        ADCON0 = 1;
-//        adcIndex = 0;
-//    } else {
-//        ADCON0 = 4 + ADCON0;
-//        adcIndex++;
-//    }
-//    GODONE = 1;
-    
-  } else {
-    unhandledIRQ = 2;
-  }
+  unhandledIRQ = 2;
 }
