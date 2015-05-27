@@ -1,0 +1,5 @@
+TODO: Change printf() behaviour so that computer UART works independently.
+TODO: Add command line interface for computer
+	Ability to set the "hold" temperature
+	
+TODO: Test the wireless UART module for remote interface

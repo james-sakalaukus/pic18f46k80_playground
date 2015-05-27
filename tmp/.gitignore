@@ -24,3 +24,6 @@
 /user.d
 /user.p1
 /user.pre
+/oneWire_maxim.d
+/oneWire_maxim.p1
+/oneWire_maxim.pre
