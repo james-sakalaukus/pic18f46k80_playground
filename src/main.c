@@ -12,9 +12,11 @@
 #include <string.h>
 #include <pic18f46k80.h>
 
+#include "configuration_bits.h"
 #include "system.h"
 #include "user.h"
 #include "oneWire_maxim.h"
+#include "ds18b20.h"
 
 /******************************************************************************/
 /* Function Prototypes                                                        */

@@ -10,7 +10,7 @@
 #include <stdbool.h>
 
 #include "oneWire_maxim.h"
-//#include "user.h"
+#include "user.h"
 
 
 /*******************************************************************************

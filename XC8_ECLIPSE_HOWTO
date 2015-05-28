@@ -1,0 +1,11 @@
+Getting the most out of Eclipse CDT:
+  XC8 header files still uses outdated methods to set absolute addresses 
+  for hardware registers.  The result is that eclipse cannot index them properly, and
+  things like GODONE and LATCbits.LATC3 cannot be referenced or used without Eclipse throwing
+  a syntax error.
+  
+  The pic18f46k80.h packaged with XC8 has been reworked so eclipse can index it properly.  This
+  can be done for other headers of interest using a find/replace with the following regular
+  expression:     
+    search:         @ (0x[0-9a-fA-F]{3})
+    replace:        __attribute__((address($1)))
