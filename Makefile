@@ -21,12 +21,12 @@ IDE_ERRORS = "--errformat=%f:%l: error: (%n) %s" "--warnformat=%f:%l: warning: (
 
 # Compiler and flags 
 CC = $(TOOL_LOC)bin/xc8
-CC_FLAGS = --pass1 --chip=$(CHIP) -Q --mode=free --runtime=default,+clear,+init,-keep,-no_startup,-download,+config,+clib,+plib --output=elf:multilocs $(IDE_ERRORS)
+CC_FLAGS = --pass1 --chip=$(CHIP) -Q --mode=free --runtime=default,+clear,+init,-keep,-no_startup,-download,+config,+clib,+plib --output=elf:multilocs $(IDE_ERRORS) --DOUBLE=32 --FLOAT=32
 
 
 # linker and flags
 LINKER = $(TOOL_LOC)bin/xc8
-LINK_FLAGS = --chip=$(CHIP) -m$(EXEC).map --mode=free --runtime=default,+clear,+init,-keep,-no_startup,-download,+config,+clib,+plib --output=elf:multilocs $(IDE_ERRORS)
+LINK_FLAGS = --chip=$(CHIP) -m$(EXEC).map --mode=free --runtime=default,+clear,+init,-keep,-no_startup,-download,+config,+clib,+plib --output=elf:multilocs $(IDE_ERRORS) --DOUBLE=32 --FLOAT=32
 
 #Programmer Commands
 PROGRAM = /opt/microchip/mplabx/mplab_ide/bin/mdb.sh programmerOptions.script

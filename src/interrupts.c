@@ -3,6 +3,7 @@
 /******************************************************************************/
 #include <xc.h>         /* XC8 General Include File */
 #include <pic18f46k80.h>
+#include <cci.h>
 #include <stdint.h>         /* For uint8_t definition */
 #include <stdbool.h>
 #include <stdio.h>
@@ -16,7 +17,7 @@
 /* High-priority service */
 int adcIndex = 0;
 
-void interrupt high_isr(void) {
+void __interrupt high_isr(void) {
 
   /* Determine which flag generated the interrupt */
   if (RC1IF) {

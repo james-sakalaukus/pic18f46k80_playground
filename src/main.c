@@ -10,8 +10,8 @@
 #include <delays.h>
 #include <adc.h>
 #include <string.h>
-#include <pic18f46k80.h>
-
+//#include <pic18f46k80.h>
+#include "pic18f46k80.h"
 #include "configuration_bits.h"
 #include "system.h"
 #include "user.h"
@@ -110,10 +110,12 @@ uint8_t updateHeater() {
   } else if(averageTemp > (float)HOLD_TEMP+0.5) {
     heaterPin = 0;
   } else {
-    heaterPin = heaterPin;
+//    heaterPin = heaterPin;
   }
   return heaterPin;
 }
+
+
 void writeDisplay() {
 
   int i;
@@ -143,6 +145,31 @@ void writeDisplay() {
   }
   printf("Max %2.1f Min %2.1f", maxTemp, minTemp);
 }
+
+
+
+void clearScreen(void) {
+  // Command bytes to clear screen
+  unsigned char clear_screen[] = {254, 88};
+
+  while(Busy2USART());
+  Write2USART(clear_screen[0]);
+  while(Busy2USART());
+  Write2USART(clear_screen[1]);
+}
+
+void setLcdBaud(void) {
+  // set to 115200
+  unsigned char set_baudrate[] = {254, 57, 8};
+
+  while(Busy2USART());
+  Write2USART(set_baudrate[0]);
+  while(Busy2USART());
+  Write2USART(set_baudrate[1]);
+  while(Busy2USART());
+  Write2USART(set_baudrate[2]);
+}
+
 
 uint8_t Init_Sensors(void) {
 
@@ -181,35 +208,14 @@ uint8_t Init_Sensors(void) {
 void readTempAll() {
   uint8_t sensorCount = 0;
   uint8_t i = 0;
-
+//  printf("\r\n");
   startTempConversion();
   for(i=0;i<DS1820_DEVICES; i++) {
     if(sensorsFound[i]) {
       currentTemps[i] = ReadTemp(tempSensorAddress[i]);
     }
   }
-}
-
-void clearScreen(void) {
-  // Command bytes to clear screen
-  unsigned char clear_screen[] = {254, 88};
-
-  while(Busy2USART());
-  Write2USART(clear_screen[0]);
-  while(Busy2USART());
-  Write2USART(clear_screen[1]);
-}
-
-void setLcdBaud(void) {
-  // set to 115200
-  unsigned char set_baudrate[] = {254, 57, 8};
-
-  while(Busy2USART());
-  Write2USART(set_baudrate[0]);
-  while(Busy2USART());
-  Write2USART(set_baudrate[1]);
-  while(Busy2USART());
-  Write2USART(set_baudrate[2]);
+//  printf("\r\n");
 }
 
 /*******************************************************************************
@@ -220,7 +226,7 @@ void startTempConversion() {
   OWWriteByte(DS1820_CMD_SKIPROM);
   output_temp_sensors(1);
   OWWriteByte(DS1820_CMD_CONVERTTEMP);
-  DelayMs(750);
+  DelayMs(2000);
 }
 /*******************************************************************************
  * Get temperature raw value from single DS1820 device.
@@ -228,9 +234,9 @@ void startTempConversion() {
 float ReadTemp(uint8_t *address)
 {
   uint8_t i;
-  uint16_t temp = 0;
+//  uint16_t temp = 0;
   float highres;
-  int8_t scratchPad[DS1820_SCRPADMEM_LEN];
+  uint8_t scratchPad[DS1820_SCRPADMEM_LEN];
 
   // read scratch pad memory for given address
   OWReset();
@@ -244,13 +250,14 @@ float ReadTemp(uint8_t *address)
   }
 
   // Print temp for Debug
-  if(scratchPad[DS1820_REG_TEMPMSB] > 0) {
-    highres = ((scratchPad[DS1820_REG_TEMPMSB] & 0x07)*64) + (scratchPad[DS1820_REG_TEMPLSB] * 0.0625);
+  if((int8_t)scratchPad[DS1820_REG_TEMPMSB] > 0) {
+    highres = ((scratchPad[DS1820_REG_TEMPMSB] & 0x07)*16) + (scratchPad[DS1820_REG_TEMPLSB] * 0.0625);
   } else {
-    highres = ((scratchPad[DS1820_REG_TEMPMSB] & 0x07)*64) + (scratchPad[DS1820_REG_TEMPLSB] * -0.0625);
+    highres = ((scratchPad[DS1820_REG_TEMPMSB] & 0x07)*16) + (scratchPad[DS1820_REG_TEMPLSB] * -0.0625);
   }
-
-//  printf("temp C: %u, %u, %2.2f \r\n", scratchPad[DS1820_REG_TEMPMSB], scratchPad[DS1820_REG_TEMPLSB], highres);
+  // convert C to F
+  highres = highres * (9/2) + 32;
+//  printf("ReadTemp() MSB: %u, LSB: %u, highres: %2.2f \r\n", scratchPad[DS1820_REG_TEMPMSB], scratchPad[DS1820_REG_TEMPLSB], highres);
 
   return (highres);
 }
