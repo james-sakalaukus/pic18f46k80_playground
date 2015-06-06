@@ -1,14 +1,17 @@
 /******************************************************************************/
 /* Files to Include                                                           */
 /******************************************************************************/
+
+#include "system.h"
+#include "user.h"
+#include "pic18f46k80.h"
+
 #include <xc.h>             /* XC8 General Include File */
 #include <stdint.h>         /* For uint8_t definition */
 #include <stdbool.h>        /* For true/false definition */
 #include <stdio.h>          /* For printf definition */
-
-#include "user.h"
-#include "system.h"
-#include "pic18f46k80.h"
+#include <timers.h>
+#include <usart.h>
 
 /******************************************************************************/
 /* User Functions                                                             */
@@ -99,17 +102,17 @@ void InitApp(void)
   /*********************************************
    * IRQ Setup
    ********************************************/
-  RC1IP = 1;  // UART1 high priority interrupt
-  RC1IF = 1;  // clear UART1 RX interrupt
-  RC1IE = 1;  // enable UART1 RX interrupt
+  IPR1bits.RC1IP = 1;  // UART1 high priority interrupt
+  PIR1bits.RC1IF = 1;  // clear UART1 RX interrupt
+  PIE1bits.RC1IE = 1;  // enable UART1 RX interrupt
 
-  RC2IP = 1;  // UART2 high priority interrupt
-  RC2IF = 1;  // clear UART2 RX interrupt
-  RC2IE = 1;  // enable UART2 RX interrupt
+  IPR3bits.RC2IP = 1;  // UART2 high priority interrupt
+  PIR3bits.RC2IF = 1;  // clear UART2 RX interrupt
+  PIE3bits.RC2IE = 1;  // enable UART2 RX interrupt
 
-  IPEN = 1;   // Enable interrupt priorities
-  PEIE = 1;   // enable peripheral interrupts
-  GIE = 1;    // enable global interrupts
+  RCONbits.IPEN = 1;   // Enable interrupt priorities
+  INTCONbits.PEIE = 1;   // enable peripheral interrupts
+  INTCONbits.GIE = 1;    // enable global interrupts
 
 
 }

@@ -19,7 +19,69 @@
 // Use BRGH=1, UART high speed mode
 #define USE_HI_SPEED_BRG
 
+/*############################################################*/
+/*          Configuration for device =  'PIC18F46K80'         */
+/*############################################################*/
 
+/* ADC */
+#define ADC_V13_3
+
+/* ECC */
+#define ECC_V8_2
+
+/* CC */
+#define CC_V8_2
+
+/* EPWM */
+#define EPWM_V14_2
+
+/* PWM */
+#define PWM_V14_2
+
+/* PCPWM */
+/*No configuration chosen for this peripheral*/
+
+/* USART */
+#define EAUSART_V11
+
+/* SPI */
+#define SPI_V1
+
+/* I2C */
+#define I2C_V1
+
+/* TIMERS */
+#define TMR_V7_2
+
+/* EEPROM */
+#define EEP_V3
+
+/* PORT_B */
+#define PTB_V2
+
+/* ANCOMP */
+#define ANCOM_V10_2
+
+/* MWIRE */
+#define MWIRE_V1
+
+/* CTMU */
+#define CTMU_V1_1
+
+/* PPS */
+/*No configuration chosen for this peripheral*/
+
+/* RTCC */
+/*No configuration chosen for this peripheral*/
+
+/* DPSLP */
+#define DPSLP_V1_2
+
+/* PMP */
+/*No configuration chosen for this peripheral*/
+
+/* FLASH */
+#define FLASH_V1_4
 /******************************************************************************/
 /* System Function Prototypes                                                 */
 /******************************************************************************/
