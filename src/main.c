@@ -249,14 +249,20 @@ float ReadTemp(uint8_t *address)
     scratchPad[i] = OWReadByte();
   }
 
-  // Print temp for Debug
+  // add msbs
+  highres = ((scratchPad[DS1820_REG_TEMPMSB] & 0x07)*16);
+  // add lsbs
+  highres = highres + (scratchPad[DS1820_REG_TEMPLSB] >> 4);
+
   if((int8_t)scratchPad[DS1820_REG_TEMPMSB] > 0) {
-    highres = ((scratchPad[DS1820_REG_TEMPMSB] & 0x07)*16) + (scratchPad[DS1820_REG_TEMPLSB] * 0.0625);
+    highres = highres + ((scratchPad[DS1820_REG_TEMPLSB] & 0x0F) * 0.0625);
   } else {
-    highres = ((scratchPad[DS1820_REG_TEMPMSB] & 0x07)*16) + (scratchPad[DS1820_REG_TEMPLSB] * -0.0625);
+    highres = highres + ((scratchPad[DS1820_REG_TEMPLSB] & 0x0F) * -0.0625);
   }
   // convert C to F
-  highres = highres * (9/2) + 32;
+  highres = ((highres * 9)/5) + 32;
+
+  // Print temp for Debug
 //  printf("ReadTemp() MSB: %u, LSB: %u, highres: %2.2f \r\n", scratchPad[DS1820_REG_TEMPMSB], scratchPad[DS1820_REG_TEMPLSB], highres);
 
   return (highres);
